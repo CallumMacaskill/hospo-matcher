@@ -5,6 +5,7 @@ function getLocation() {
                 const latitude = position.coords.latitude;
                 const longitude = position.coords.longitude;
                 console.log(`Latitude: ${latitude}, Longitude: ${longitude}`);
+                document.getElementById("coordinates").innerHTML = `${latitude}, ${longitude}`;
             },
             (error) => {
                 console.error(`Error: ${error.message}`);
