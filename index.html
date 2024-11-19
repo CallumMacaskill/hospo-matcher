@@ -15,7 +15,31 @@
   <div class="container">
     <button onclick="getLocation()">Get Location</button>
     <p id="coordinates"></p> <!-- Placeholder for showing the user's coordinates -->
+    <button id="fetch-btn">Fetch</button>
+    <p id="response-output">Response Placeholder</p>
+    <button id="fetch-key-btn">Fetch Key</button>
+    <p id="key-response-output">Key Response Placeholder</p>
   </div>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const fetchBtn = document.getElementById('fetch-btn')
+      const responseText = document.getElementById('response-output')
+      const fetchKeyBtn = document.getElementById('fetch-key-btn')
+      const keyResponseText = document.getElementById('key-response-output')
+
+      fetchBtn.addEventListener('click', async () => {
+        const response = await fetch('/.netlify/functions/sample-function').then(response => response.json()
+        )
+        responseText.innerText = JSON.stringify(response)
+      })
+
+      fetchKeyBtn.addEventListener('click', async () => {
+        const response = await fetch('/.netlify/functions/read-key').then(response => response.json()
+        )
+        keyResponseText.innerText = JSON.stringify(response)
+      })
+    })
+  </script>
 </body>
 
 </html>
