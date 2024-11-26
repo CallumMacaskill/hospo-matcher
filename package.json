@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "mongodb": "^6.11.0",
+    "netlify-cli": "^17.37.2"
+  }
+}
