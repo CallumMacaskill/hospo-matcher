@@ -1,22 +1,17 @@
-// Global variables to store latitude and longitude
-var currentLatitude = null;
-var currentLongitude = null;
-var session = null;
-
 // Function to get query parameter value
 function getQueryParam(param) {
     const params = new URLSearchParams(window.location.search);
     return params.get(param);
 }
 
-const sessionCode = getQueryParam("sessionCode");
+var sessionCode = getQueryParam("sessionCode");
+var session = null;
 
 // If session code present, get session data
 if (sessionCode) {
     getSession(sessionCode).then(session_result => {
         console.log(`session:`, session_result);
         session = session_result
-        document.getElementById("session-data").innerText = JSON.stringify(session_result);
     });
 }
 
@@ -32,44 +27,88 @@ async function getSession(sessionCode) {
     return data
 }
 
-// Function to get the user's geolocation
-function getLocation() {
-    if (navigator.geolocation) {
-        navigator.geolocation.getCurrentPosition(
-            (position) => {
-                currentLatitude = position.coords.latitude;
-                currentLongitude = position.coords.longitude;
-                console.log(`Latitude: ${currentLatitude}, Longitude: ${currentLongitude}`);
-                document.getElementById("coordinates").innerText = `${currentLatitude}, ${currentLongitude}`;
-            },
-            (error) => {
-                console.error(`Error: ${error.message}`);
-            }
-        );
-    } else {
-        console.error("Geolocation is not supported by this browser.");
+function shareLink() {
+    // Require active session
+    if (!sessionCode) {
+        console.log("session invalid")
+        return
     }
+
+    // Construct link
+    const url = `http://localhost:8888/?sessionCode=${sessionCode}`
+
+    // Copy to clipboard
+    navigator.clipboard.writeText(url);
+    console.log(`Copied to clipboard: ${url}`)
 }
 
-function calculateMidpoint() {
-
+function getLocation() {
+    return new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const currentLatitude = position.coords.latitude;
+                    const currentLongitude = position.coords.longitude;
+                    console.log(`Latitude: ${currentLatitude}, Longitude: ${currentLongitude}`);
+                    resolve({ currentLatitude, currentLongitude });
+                },
+                (error) => {
+                    console.error(`Error: ${error.message}`);
+                    reject(error);
+                }
+            );
+        } else {
+            console.error("Geolocation is not supported by this browser.");
+            reject(new Error("Geolocation not supported"));
+        }
+    });
 }
 
-// Attach event listeners when the DOM is fully loaded
-document.addEventListener("DOMContentLoaded", () => {
-    const getLocationBtn = document.getElementById("get-location-btn");
-    const createSessionBtn = document.getElementById("create-session-btn");
-    const createSessionOutput = document.getElementById("create-session-output");
-    const updateSessionBtn = document.getElementById("update-session-btn");
-    const updateSessionOutput = document.getElementById("update-session-output");
 
-    // Attach click event listener to "Get Location" button
-    getLocationBtn.addEventListener("click", getLocation);
+function calculateMidpoint(currentLatitude, currentLongitude) {
+    // Check if inputs are valid
+    if (!currentLatitude || !currentLongitude || !sessionCode) {
+        console.error("Invalid inputs: currentLatitude, currentLongitude, and session must have values.");
+        return null;
+    }
+    console.log("args valid")
 
-    // Attach click event listener to "Create Session" button
-    createSessionBtn.addEventListener("click", async () => {
+    // Parse the coordinates from the session
+    var coordinates = sessionCode.coordinates;
+    if (!Array.isArray(coordinates) || coordinates.length === 0) {
+        console.error("Invalid session format: session.coordinates must be a non-empty array.");
+        return null;
+    }
+    console.log("coordinates valid")
+
+    // Accumulate coordinate values
+    let totalLatitude = currentLatitude;
+    let totalLongitude = currentLongitude;
+    coordinates.forEach(coord => {
+        totalLatitude += coord.latitude;
+        totalLongitude += coord.longitude;
+    });
+    console.log(`Total lat: ${totalLatitude}, total long: ${totalLongitude}`)
+
+    // Calculate the average latitude and longitude
+    const midpoint = {
+        latitude: totalLatitude / (coordinates.length + 1),
+        longitude: totalLongitude / (coordinates.length + 1)
+    };
+
+    console.log(`Midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
+
+    return midpoint;
+}
+
+async function sessionLocationHandling() {
+    // Await the result of getLocation
+    const { currentLatitude, currentLongitude } = await getLocation();
+
+    if (!sessionCode) {
+        console.log("Null session!");
         if (currentLatitude === null || currentLongitude === null) {
-            alert("Please get your location first!");
+            alert("Variable error!");
             return;
         }
 
@@ -83,18 +122,12 @@ document.addEventListener("DOMContentLoaded", () => {
                 console.error("Error fetching data:", error);
                 return { error: "Failed to fetch data" };
             });
+        session = response.session
+        sessionCode = session.code
+    } else if (sessionCode) {
+        console.log("Session :)")
 
-        createSessionOutput.innerText = JSON.stringify(response);
-    });
-
-    // Attach click event listener to "Create Session" button
-    updateSessionBtn.addEventListener("click", async () => {
-        if (currentLatitude === null || currentLongitude === null) {
-            alert("Please get your location first!");
-            return;
-        }
-
-        // Dynamically include the lat and long in the fetch URL
+        // Update session with new user's coordinates
         const url = `/.netlify/functions/update_session?code=${sessionCode}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
         console.log("Fetching from URL:", url);
 
@@ -105,6 +138,18 @@ document.addEventListener("DOMContentLoaded", () => {
                 return { error: "Failed to fetch data" };
             });
 
-        createSessionOutput.innerText = JSON.stringify(response);
-    });
+        midpoint = calculateMidpoint(currentLatitude, currentLongitude);
+        console.log(`Got midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
+    }
+}
+
+
+// Attach event listeners when the DOM is fully loaded
+document.addEventListener("DOMContentLoaded", () => {
+    const getLocationBtn = document.getElementById("get-location-btn");
+    const shareLinkBtn = document.getElementById("share-link-btn");
+
+    // Attach click event listener to buttons
+    getLocationBtn.addEventListener("click", sessionLocationHandling);
+    shareLinkBtn.addEventListener("click", shareLink)
 });
