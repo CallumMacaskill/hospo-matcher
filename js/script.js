@@ -22,7 +22,7 @@ async function getSession(sessionCode) {
 
     const response = await fetch(url);
     console.log("Got response")
-    data = await response.json();
+    const data = await response.json();
     console.log("Returning data")
     return data
 }
@@ -67,14 +67,14 @@ function getLocation() {
 
 function calculateMidpoint(currentLatitude, currentLongitude) {
     // Check if inputs are valid
-    if (!currentLatitude || !currentLongitude || !sessionCode) {
+    if (!currentLatitude || !currentLongitude || !sessionCode || !session) {
         console.error("Invalid inputs: currentLatitude, currentLongitude, and session must have values.");
         return null;
     }
     console.log("args valid")
 
     // Parse the coordinates from the session
-    var coordinates = sessionCode.coordinates;
+    var coordinates = session.coordinates;
     if (!Array.isArray(coordinates) || coordinates.length === 0) {
         console.error("Invalid session format: session.coordinates must be a non-empty array.");
         return null;
@@ -99,6 +99,27 @@ function calculateMidpoint(currentLatitude, currentLongitude) {
     console.log(`Midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
 
     return midpoint;
+}
+
+// Function to display places in the HTML
+function displayPlaces(data) {
+    const placesList = document.getElementById('places-list');
+    placesList.innerHTML = ''; // Clear the current list
+    
+    data.places.forEach(place => {
+        const placeDiv = document.createElement('div');
+        placeDiv.classList.add('place');
+
+        const title = document.createElement('h3');
+        title.textContent = place.displayName.text;
+        placeDiv.appendChild(title);
+
+        const address = document.createElement('p');
+        address.textContent = place.formattedAddress;
+        placeDiv.appendChild(address);
+
+        placesList.appendChild(placeDiv);
+    });
 }
 
 async function sessionLocationHandling() {
@@ -128,18 +149,29 @@ async function sessionLocationHandling() {
         console.log("Session :)")
 
         // Update session with new user's coordinates
-        const url = `/.netlify/functions/update_session?code=${sessionCode}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
+        var url = `/.netlify/functions/update_session?code=${sessionCode}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
         console.log("Fetching from URL:", url);
 
-        const response = await fetch(url)
+        var response = await fetch(url)
             .then((response) => response.json())
             .catch((error) => {
                 console.error("Error fetching data:", error);
                 return { error: "Failed to fetch data" };
             });
 
-        midpoint = calculateMidpoint(currentLatitude, currentLongitude);
+        // Calculate midpoint
+        const midpoint = calculateMidpoint(currentLatitude, currentLongitude);
         console.log(`Got midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
+
+        // Find nearby results
+        console.log("Searching nearby places")
+        url = `/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`;
+
+        response = await fetch(url);
+        console.log("Got places")
+        const data = await response.json();
+
+        displayPlaces(data)
     }
 }
 
