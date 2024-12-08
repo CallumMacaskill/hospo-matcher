@@ -7,6 +7,7 @@ const clientPromise = mongoClient.connect();
 export const handler = async (event) => {
   // Define session data
   const { code } = event.queryStringParameters
+  const { userId } = event.queryStringParameters
   var { latitude } = event.queryStringParameters
   var { longitude } = event.queryStringParameters
 
@@ -21,17 +22,20 @@ export const handler = async (event) => {
   // Submit update session request
   const filter = { "code": code }
   const update = {
-    "$push": {
-      "coordinates": { "latitude": latitude, "longitude": longitude }
+    "$set": {
+      [`user_coordinates.${userId}`]: {
+        "latitude": latitude,
+        "longitude": longitude
+      }
     }
   };
 
-  update_result = await collection.updateOne(filter, update);
+  updateResult = await collection.updateOne(filter, update);
   console.log("Updated document")
-  console.log(update_result)
+  console.log(updateResult)
 
   return {
     statusCode: 200,
-    body: JSON.stringify(update_result)
+    body: JSON.stringify(updateResult)
   }
 }

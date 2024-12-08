@@ -7,17 +7,40 @@ function getQueryParam(param) {
 var sessionCode = getQueryParam("sessionCode");
 var session = null;
 
+// Get user ID from browser storage, if present.
+var userId = localStorage.getItem("user_id");
+console.log(`User ID: ${userId}`)
+
+if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem("user_id", userId);
+}
+console.log(`User ID: ${userId}`)
+
 // If session code present, get session data
 if (sessionCode) {
     getSession(sessionCode).then(session_result => {
         console.log(`session:`, session_result);
-        session = session_result
+        session = session_result;
+
+        // Move user_coordinates logic here
+        if (userId in session["user_coordinates"]) {
+            const user_coordinates = session["user_coordinates"][userId];
+            console.log(`Your existing coordinates: ${user_coordinates.latitude}, ${user_coordinates.longitude}`);
+        } else {
+            console.log("User ID not found in user_coordinates.");
+        }
+    }).catch(error => {
+        console.error("Failed to get session:", error);
     });
+} else {
+    console.info("No session code provided.");
 }
+
 
 async function getSession(sessionCode) {
     console.log("Fetching session data")
-    const url = `/.netlify/functions/read_session?session_code=${sessionCode}`;
+    const url = `/.netlify/functions/read_session?sessionCode=${sessionCode}`;
     console.log("Fetching from URL:", url);
 
     const response = await fetch(url);
@@ -74,26 +97,23 @@ function calculateMidpoint(currentLatitude, currentLongitude) {
     console.log("args valid")
 
     // Parse the coordinates from the session
-    var coordinates = session.coordinates;
-    if (!Array.isArray(coordinates) || coordinates.length === 0) {
-        console.error("Invalid session format: session.coordinates must be a non-empty array.");
-        return null;
-    }
-    console.log("coordinates valid")
+    var coordinates = session.user_coordinates
 
     // Accumulate coordinate values
     let totalLatitude = currentLatitude;
     let totalLongitude = currentLongitude;
-    coordinates.forEach(coord => {
-        totalLatitude += coord.latitude;
-        totalLongitude += coord.longitude;
-    });
+    for (const [userId, coordinates] of Object.entries(session.user_coordinates)) {
+        totalLatitude += coordinates.latitude;
+        totalLongitude += coordinates.longitude;
+    };
+    console.log(typeof(totalLatitude))
     console.log(`Total lat: ${totalLatitude}, total long: ${totalLongitude}`)
 
     // Calculate the average latitude and longitude
+    const numCoordinates = Object.keys(session.user_coordinates).length
     const midpoint = {
-        latitude: totalLatitude / (coordinates.length + 1),
-        longitude: totalLongitude / (coordinates.length + 1)
+        latitude: totalLatitude / (numCoordinates + 1),
+        longitude: totalLongitude / (numCoordinates + 1)
     };
 
     console.log(`Midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
@@ -127,14 +147,10 @@ async function sessionLocationHandling() {
     const { currentLatitude, currentLongitude } = await getLocation();
 
     if (!sessionCode) {
-        console.log("Null session!");
-        if (currentLatitude === null || currentLongitude === null) {
-            alert("Variable error!");
-            return;
-        }
+        console.log("Null session");
 
         // Dynamically include the lat and long in the fetch URL
-        const url = `/.netlify/functions/create_session?latitude=${currentLatitude}&longitude=${currentLongitude}`;
+        const url = `/.netlify/functions/create_session?userId=${userId}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
         console.log("Fetching from URL:", url);
 
         const response = await fetch(url)
@@ -149,7 +165,7 @@ async function sessionLocationHandling() {
         console.log("Session :)")
 
         // Update session with new user's coordinates
-        var url = `/.netlify/functions/update_session?code=${sessionCode}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
+        var url = `/.netlify/functions/update_session?code=${sessionCode}&userId=${userId}&latitude=${currentLatitude}&longitude=${currentLongitude}`;
         console.log("Fetching from URL:", url);
 
         var response = await fetch(url)

@@ -6,19 +6,19 @@ const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
   // Define session data
-  const { session_code } = event.queryStringParameters
+  const { sessionCode } = event.queryStringParameters
 
   // Connect to MongoDB
   const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
   const collection = database.collection(process.env.MONGODB_SESSIONS_COLLECTION);
 
   // Read session document
-  session_doc = await collection.findOne({ "code": session_code })
+  sessionDoc = await collection.findOne({ "code": sessionCode })
   console.log("Found document")
-  console.log(session_doc)
+  console.log(sessionDoc)
 
   return {
     statusCode: 200,
-    body: JSON.stringify(session_doc)
+    body: JSON.stringify(sessionDoc)
   }
 }

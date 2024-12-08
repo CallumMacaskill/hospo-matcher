@@ -7,6 +7,7 @@ const clientPromise = mongoClient.connect();
 export const handler = async (event) => {
     // Define session data
     let uuid = crypto.randomUUID();
+    const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters
     var { longitude } = event.queryStringParameters
 
@@ -16,13 +17,14 @@ export const handler = async (event) => {
 
     session = {
         "code": uuid,
-        "coordinates": [
-            {
+        "user_coordinates": {
+            [userId]: {
                 "latitude": latitude,
                 "longitude": longitude
             }
-        ],
+        }
     }
+    console.log(session);
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
