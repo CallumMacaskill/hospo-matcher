@@ -1,8 +1,21 @@
 export const elements = {
+    loadingSpinner: document.getElementById('loading-spinner'),
+    mainContainer: document.getElementById('main-content'),
+    pageDescription: document.getElementById('page-description'),
     getLocationBtn: document.getElementById("get-location-btn"),
+    editLocationBtn: document.getElementById("edit-location-btn"),
     shareLinkBtn: document.getElementById("share-link-btn"),
     placesList: document.getElementById("places-list"),
 };
+
+export function updatePageDescription(text) {
+    console.log(`Updating text with: ${text}`);
+    if (elements.pageDescription) {
+        elements.pageDescription.textContent = text;
+    } else {
+        console.error('Page description element not found!');
+    }
+}
 
 export function displayPlaces(data) {
     elements.placesList.innerHTML = ''; // Clear the current list

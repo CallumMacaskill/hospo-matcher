@@ -9,14 +9,23 @@
 </head>
 
 <body>
-  <h1>Nearby Places</h1>
-  <div>
-    <button id="get-location-btn">Use my Location</button>
-    <button id="share-link-btn">Add Friends</button>
+  <div class="container">
+    <div id="header-content" class="container">
+      <h2 class="page-heading">Midpoint</h2>
+    </div>
+    <div id="loading-spinner" class="spinner"></div>
+    <div id="main-content" class="container hidden">
+      <p id="page-description" class="page-description hidden"></p>
+      <!-- Buttons -->
+      <button id="edit-location-btn" class="hidden">Update your location</button>
+      <button id="get-location-btn" class="btn primary">Use my Location</button>
+      <button id="share-link-btn" class="btn secondary hidden">Share Meetup with Friends</button>
+    </div>
+    <div id="places-list"></div>
   </div>
-  <div id="places-list"></div>
+
   <!-- Link to external JavaScript file -->
-  <script src="js/script.js" defer type="module"></script>
+  <script src="js/script.js" type="module"></script>
 </body>
 
 </html>
