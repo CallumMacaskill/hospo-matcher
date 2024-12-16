@@ -85,6 +85,11 @@ body {
     /* Add space below the description */
 }
 
+.page-text {
+    font-size: 16px;
+    text-align: center;
+    margin-top: 32px;
+}
 
 /* Button Styles */
 .btn {
@@ -119,6 +124,7 @@ body {
     font-size: 1rem;
     cursor: pointer;
     margin-top: 0.5rem;
+    margin-bottom: 2rem;
     padding: 0;
   }
   

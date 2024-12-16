@@ -1,4 +1,4 @@
-import { elements, updatePageDescription, displayPlaces } from './dom.js';
+import { elements, refreshPageSubheading, displayPlaces } from './dom.js';
 import { getSession, createSession, updateSession } from './api.js';
 import { getLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
@@ -9,48 +9,75 @@ var currentUserData = new CurrentUserData()
 console.log(`Using session code: ${currentUserData.getSessionCode()}`)
 
 // Get session data if available
-if ( currentUserData.getSessionCode()) {
+if (currentUserData.getSessionCode()) {
     console.log(`Reading session from database.`)
     var session = await getSession(currentUserData.getSessionCode())
     console.log(`Read session from database.`)
 }
 
-console.log(`Session: ${session}`)
-
-// Generate contextualised page description
-var page_description = 'Start a new meetup by adding your location'
-if ( session ) {
-    const code_substring = currentUserData.getSessionCode().substring(0, 6);
-
-    // Check if user has already submitted location
+// Check if user has already submitted location
+if (session) {
     const user_ids = Object.keys(session['user_coordinates'])
     if (user_ids.includes(currentUserData.getOrCreateUserId())) {
-        page_description = `You've already joined meetup #${code_substring}`;
+        // Offer changing location data
         elements.editLocationBtn.classList.remove('hidden')
-        elements.getLocationBtn.classList.add('hidden')
-    } else {
-        page_description = `You're joining meetup #${code_substring}`;
-    }
+        elements.getLocationBtn.classList.add('hidden');
 
+        // Calculate midpoint, show results, show link button
+        evaluateSession(session)
+        elements.shareLinkBtn.classList.remove('hidden');
+    }
 }
 
-// Update page description and show element
-updatePageDescription(page_description);
-elements.pageDescription.classList.remove('hidden');
+// Generate a contextualised description based on data inputs
+refreshPageSubheading(
+    session,
+    currentUserData.getSessionCode(),
+    currentUserData.getOrCreateUserId()
+);
 
 // Show main content and hide loading spinner
 elements.loadingSpinner.classList.add('hidden');
 elements.mainContainer.classList.remove('hidden');
 
-async function sessionLocationHandling() {
-    console.log('Button clicked');
+async function evaluateSession(session, latitude, longitude) {
+    console.log('Calculating midpoint of all session users.')
+    const midpoint = calculateMidpoint(session, latitude, longitude);
+    console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
+
+    // Update midpoint element text
+    elements.midpointText.innerText = `Your meetup midpoint is ${midpoint.latitude}, ${midpoint.longitude}`;
+    elements.midpointText.classList.remove('hidden');
+
+    console.log(`Fetching Nearby Places results.`)
+    const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
+    displayPlaces(placesData);
+}
+
+async function processUserSessionInput() {
     const { latitude, longitude } = await getLocation();
     console.log(`Loaded coordinates: ${latitude}, ${longitude}`)
     if (!currentUserData.getSessionCode()) {
         console.log('Creating new session.')
-        await createSession(currentUserData.getOrCreateUserId(), latitude, longitude);
-        console.log('Created new session.')
-        // Upon success, prompt user to share with friends
+
+        elements.loadingSpinner.classList.remove('hidden');
+        elements.mainContainer.classList.add('hidden');
+
+        const response = await createSession(currentUserData.getOrCreateUserId(), latitude, longitude);
+
+        // Update current data with new session values
+        session = response['session']
+        currentUserData.setSessionCode(session['code'])
+
+        // Update page context after creating session
+        refreshPageSubheading(
+            session,
+            currentUserData.getSessionCode(),
+            currentUserData.getOrCreateUserId()
+        );
+
+        elements.loadingSpinner.classList.add('hidden');
+        elements.mainContainer.classList.remove('hidden');
     } else {
         console.log(`Updating session with current user's location`)
         await updateSession(
@@ -59,16 +86,9 @@ async function sessionLocationHandling() {
             latitude,
             longitude
         );
-
-        console.log('Calculating midpoint of all session users.')
-        const midpoint = calculateMidpoint(latitude, longitude, session);
-        console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
-
-        //console.log(`Fetching Nearby Places results.`)
-        //const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
-        //displayPlaces(placesData);
+        evaluateSession(session, latitude, longitude);
     }
-    // Show share link button
+    // Upon success, prompt user to share with friends
     elements.shareLinkBtn.classList.remove('hidden');
 }
 
@@ -80,9 +100,9 @@ function shareLink() {
 }
 
 // Add event listeners to HTML elements
-elements.getLocationBtn.addEventListener("click", sessionLocationHandling);
+elements.getLocationBtn.addEventListener("click", processUserSessionInput);
 elements.shareLinkBtn.addEventListener("click", shareLink);
 elements.editLocationBtn.addEventListener('click', () => {
     elements.editLocationBtn.classList.add('hidden');
     elements.getLocationBtn.classList.remove('hidden');
-  });
+});
