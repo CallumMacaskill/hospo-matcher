@@ -40,18 +40,22 @@ refreshPageSubheading(
 elements.loadingSpinner.classList.add('hidden');
 elements.mainContainer.classList.remove('hidden');
 
-async function evaluateSession(session, latitude, longitude) {
-    console.log('Calculating midpoint of all session users.')
-    const midpoint = calculateMidpoint(session, latitude, longitude);
-    console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
-
-    // Update midpoint element text
-    elements.midpointText.innerText = `Your meetup midpoint is ${midpoint.latitude}, ${midpoint.longitude}`;
+async function evaluateSession(session) {
+    let midpointResult = "Only one location submitted. Invite friends to find your midpoint."
+    if ( Object.keys(session['user_coordinates']).length > 1 ) {
+        console.log('Calculating midpoint of all session users.')
+        const midpoint = calculateMidpoint(session);
+        console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
+    
+        // Update midpoint element text
+        midpointResult = `Your meetup midpoint is ${midpoint.latitude}, ${midpoint.longitude}`;
+        
+        console.log(`Fetching Nearby Places results.`)
+        const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
+        displayPlaces(placesData);
+    }
+    elements.midpointText.innerText = midpointResult;
     elements.midpointText.classList.remove('hidden');
-
-    console.log(`Fetching Nearby Places results.`)
-    const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
-    displayPlaces(placesData);
 }
 
 async function processUserSessionInput() {
@@ -80,13 +84,14 @@ async function processUserSessionInput() {
         elements.mainContainer.classList.remove('hidden');
     } else {
         console.log(`Updating session with current user's location`)
-        await updateSession(
+        const response = await updateSession(
             currentUserData.getSessionCode(),
             currentUserData.getOrCreateUserId(),
             latitude,
             longitude
         );
-        evaluateSession(session, latitude, longitude);
+        session = response['session']
+        evaluateSession(session);
     }
     // Upon success, prompt user to share with friends
     elements.shareLinkBtn.classList.remove('hidden');

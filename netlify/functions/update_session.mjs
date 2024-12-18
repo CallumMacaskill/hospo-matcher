@@ -31,11 +31,16 @@ export const handler = async (event) => {
   };
 
   updateResult = await collection.updateOne(filter, update);
-  console.log("Updated document")
-  console.log(updateResult)
 
-  return {
-    statusCode: 200,
-    body: JSON.stringify(updateResult)
+  // Get new session data and return upon success
+  if (updateResult['modifiedCount'] == 1) {
+    sessionDoc = await collection.findOne(filter);
+    return {
+      statusCode: 200,
+      body: JSON.stringify({
+        updateResult: updateResult,
+        session: sessionDoc
+      })
+    }
   }
 }
