@@ -24,7 +24,7 @@ export class CurrentUserData {
     }
 }
 
-export function calculateMidpoint(session, latitude, longitude) {
+export function calculateMidpoint(session) {
     if (!session) {
         throw new Error("Invalid inputs for calculating midpoint.");
     }
@@ -32,23 +32,12 @@ export function calculateMidpoint(session, latitude, longitude) {
     let totalLatitude = 0;
     let totalLongitude = 0;
 
-    if ( latitude ) {
-        totalLatitude += latitude;
-    }
-    if ( longitude ) {
-        totalLongitude += longitude;
-    }
-
     Object.values(session.user_coordinates).forEach(({ latitude, longitude }) => {
         totalLatitude += latitude;
         totalLongitude += longitude;
     });
 
-    let numCoordinates = Object.keys(session.user_coordinates).length;
-    if (latitude && longitude ) {
-        numCoordinates += 1
-    }
-
+    const numCoordinates = Object.keys(session.user_coordinates).length;
     return {
         latitude: totalLatitude / numCoordinates,
         longitude: totalLongitude / numCoordinates,
