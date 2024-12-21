@@ -42,13 +42,14 @@ elements.mainContainer.classList.remove('hidden');
 
 async function evaluateSession(session) {
     let midpointResult = "Only one location submitted. Invite friends to find your midpoint."
-    if (Object.keys(session['user_coordinates']).length > 1) {
+    const numLocations = Object.keys(session['user_coordinates']).length
+    if (numLocations > 1) {
         console.log('Calculating midpoint of all session users.')
         const midpoint = calculateMidpoint(session);
         console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
 
         // Update midpoint element text
-        midpointResult = `Your meetup midpoint is ${midpoint.latitude}, ${midpoint.longitude}`;
+        midpointResult = `Your meetup midpoint from ${numLocations} locations is ${midpoint.latitude}, ${midpoint.longitude}`;
 
         console.log(`Fetching Nearby Places results.`)
         const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
