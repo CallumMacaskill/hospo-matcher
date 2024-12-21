@@ -91,28 +91,37 @@ body {
     margin-top: 32px;
 }
 
-/* Button Styles */
+/* General Button Styles */
 .btn {
     display: block;
-    /* Makes buttons full width */
-    width: 100%;
+    width: 100%; /* Full width */
     padding: 15px;
     font-size: 16px;
     border: none;
-    border-radius: 6px;
+    border-radius: 6px; /* Consistent rounded corners */
     cursor: pointer;
-    margin-bottom: 10px;
-    /* Space between buttons */
+    margin-bottom: 10px; /* Space between buttons */
+    transition: all 0.3s ease; /* Smooth transitions for all properties */
 }
 
+/* Primary Button */
 .btn.primary {
     background-color: #007bff;
     color: white;
 }
 
+/* Default Secondary Button */
 .btn.secondary {
     background-color: #8b9298;
     color: white;
+    border: 2px solid transparent; /* Transparent border for consistent sizing */
+}
+
+/* Secondary Button 'Clicked' State */
+.btn.secondary.inverted {
+    background-color: white;
+    color: #8b9298;
+    border-color: #8b9298; /* Matches the text color */
 }
 
 #edit-location-btn {

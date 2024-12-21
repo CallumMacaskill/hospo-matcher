@@ -44,3 +44,18 @@ export function displayPlaces(data) {
         elements.placesList.appendChild(placeDiv);
     });
 }
+
+
+export function invertShareLinkStyling() {
+    // Update button appearance and disable it
+    elements.shareLinkBtn.textContent = 'Copied!';
+    elements.shareLinkBtn.classList.add('inverted');
+    elements.shareLinkBtn.disabled = true;
+
+    // Revert button state after 2 seconds
+    setTimeout(() => {
+        elements.shareLinkBtn.textContent = 'Share Link';
+        elements.shareLinkBtn.classList.remove('inverted');
+        elements.shareLinkBtn.disabled = false;
+    }, 2000);
+}

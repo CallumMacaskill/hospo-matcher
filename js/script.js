@@ -1,4 +1,4 @@
-import { elements, refreshPageSubheading, displayPlaces } from './dom.js';
+import { elements, refreshPageSubheading, displayPlaces, invertShareLinkStyling } from './dom.js';
 import { getSession, createSession, updateSession } from './api.js';
 import { getLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
@@ -42,14 +42,14 @@ elements.mainContainer.classList.remove('hidden');
 
 async function evaluateSession(session) {
     let midpointResult = "Only one location submitted. Invite friends to find your midpoint."
-    if ( Object.keys(session['user_coordinates']).length > 1 ) {
+    if (Object.keys(session['user_coordinates']).length > 1) {
         console.log('Calculating midpoint of all session users.')
         const midpoint = calculateMidpoint(session);
         console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
-    
+
         // Update midpoint element text
         midpointResult = `Your meetup midpoint is ${midpoint.latitude}, ${midpoint.longitude}`;
-        
+
         console.log(`Fetching Nearby Places results.`)
         const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
         displayPlaces(placesData);
@@ -98,9 +98,16 @@ async function processUserSessionInput() {
 }
 
 function shareLink() {
+    // Require active session code to share link
     if (currentUserData.getSessionCode()) {
         const url = `http://localhost:8888/?code=${currentUserData.getSessionCode()}`;
-        navigator.clipboard.writeText(url);
+
+        // Copy link to clipboard
+        navigator.clipboard.writeText(url).then(() => {
+            invertShareLinkStyling()
+        }).catch(err => {
+            console.error('Failed to copy text:', err);
+        });
     }
 }
 
