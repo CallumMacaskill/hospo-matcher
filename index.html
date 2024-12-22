@@ -9,19 +9,29 @@
 </head>
 
 <body>
-  <div class="container">
-    <div id="header-content" class="container">
+  <div class="wrapper">
+    <div id="header-content">
       <h2 class="page-heading">Midpoint</h2>
     </div>
-    <div id="loading-spinner" class="spinner"></div>
-    <div id="main-content" class="container hidden">
-      <p id="page-description" class="page-description"></p>
-      <button id="edit-location-btn" class="hidden">Change your location</button>
-      <button id="get-location-btn" class="btn primary">Use my Location</button>
-      <button id="share-link-btn" class="btn secondary hidden">Share Meetup with Friends</button>
-      <p id="midpoint-text" class="page-text hidden"></p>
+
+    <!-- Loading Spinner Container -->
+    <div id="loading-spinner-container">
+      <div id="loading-spinner" class="spinner popup show"></div>
     </div>
-    <div id="places-list"></div>
+
+    <div id="main-container" class="popup">
+      <div id="inputs-container" class="popup show">
+        <p id="page-description" class="page-description"></p>
+        <button id="edit-location-btn" class="hidden">Change your location</button>
+        <button id="get-location-btn" class="btn primary">Use my Location</button>
+        <button id="share-link-btn" class="btn secondary hidden">Share Meetup with Friends</button>
+      </div>
+      <div id="results-container" class="popup">
+        <p id="midpoint-text" class="page-text"></p>
+        <div id="places-list"></div>
+      </div>
+    </div>
+    
   </div>
 
   <!-- Link to external JavaScript file -->

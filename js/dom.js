@@ -1,10 +1,12 @@
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
-    mainContainer: document.getElementById('main-content'),
+    mainContainer: document.getElementById('main-container'),
+    inputsContainer: document.getElementById('inputs-container'),
     pageDescription: document.getElementById('page-description'),
     getLocationBtn: document.getElementById("get-location-btn"),
     editLocationBtn: document.getElementById("edit-location-btn"),
     shareLinkBtn: document.getElementById("share-link-btn"),
+    resultsContainer: document.getElementById("results-container"),
     midpointText: document.getElementById("midpoint-text"),
     placesList: document.getElementById("places-list"),
 };
@@ -27,7 +29,7 @@ export function refreshPageSubheading(session, sessionCode, userId) {
 }
 
 
-export function displayPlaces(data) {
+export function generatePlacesElements(data) {
     elements.placesList.innerHTML = ''; // Clear the current list
     data.places.forEach(place => {
         const placeDiv = document.createElement('div');
@@ -59,3 +61,24 @@ export function invertShareLinkStyling() {
         elements.shareLinkBtn.disabled = false;
     }, 2000);
 }
+
+export function setVisibility(element, show) {
+    if (show) {
+        element.classList.add('show');
+    } else {
+        element.classList.remove('show');
+    }
+}
+
+export async function setLoadingVisibility(show) {
+    if (show) {
+        setVisibility(elements.mainContainer, false)
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setVisibility(elements.loadingSpinner, true)
+    } else {
+        setVisibility(elements.loadingSpinner, false)
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        setVisibility(elements.mainContainer, true)
+    }
+}
+

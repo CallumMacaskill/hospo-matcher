@@ -12,46 +12,43 @@ body {
     font-family: Arial, sans-serif;
     display: flex;
     justify-content: center;
-    /* Center the content horizontally */
-    align-items: center;
-    /* Center the content vertically */
     min-height: 100vh;
-    /* Full viewport height */
-    padding: 20px;
 }
 
-/* Container */
-.container {
+/* Wrapper for content */
+.wrapper {
     width: 100%;
     max-width: 400px;
-    /* Set max width for centered layout on larger screens */
     background: white;
     border-radius: 8px;
     padding: 20px;
 }
 
-.spinner {
-    border: 10px solid #f3f3f3;
-    /* Light grey */
-    border-top: 10px solid #3498db;
-    /* Blue */
-    border-radius: 50%;
-    width: 50px;
-    height: 50px;
-    animation: spin 1.5s linear infinite;
-    -webkit-animation: spin 1.5s linear infinite;
-    /* Safari */
+/* Container for loading spinner */
+#loading-spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center; /* Center horizontally */
+    align-items: flex-start; /* Align to the top */
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
+    visibility: hidden; /* Hidden by default */
+    pointer-events: none; /* Allow clicks to pass through */
+    padding-top: 10%; /* Adjust this value to control vertical positioning */
 }
 
-/* Safari */
-@-webkit-keyframes spin {
-    0% {
-        -webkit-transform: rotate(0deg);
-    }
-
-    100% {
-        -webkit-transform: rotate(360deg);
-    }
+/* Loading spinner style */
+#loading-spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #3498db;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 1.5s linear infinite;
 }
 
 @keyframes spin {
@@ -64,6 +61,13 @@ body {
     }
 }
 
+/* Show the loading spinner when it's active */
+#loading-spinner-container.show {
+    visibility: visible; /* Show the spinner */
+    pointer-events: all; /* Enable interaction with the spinner */
+}
+
+
 /* Page Heading */
 .page-heading {
     font-size: 24px;
@@ -71,6 +75,7 @@ body {
     font-weight: bold;
     text-align: center;
     /* Center-align text */
+    margin-top: 15px;
     margin-bottom: 15px;
     /* Add space below the heading */
 }
@@ -166,6 +171,19 @@ body {
     color: #555;
 }
 
+.popup {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms ease-in, visibility 0ms ease-in 200ms;
+  }
+  
+.popup.show {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+/* Utility class to hide elements after fading out */
 .hidden {
     display: none;
 }
