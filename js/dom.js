@@ -82,3 +82,17 @@ export async function setLoadingVisibility(show) {
     }
 }
 
+export function initializeAutocomplete() {
+    // Create the Place Autocomplete Element
+    const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+
+    // Add it below the "Get Current Location" button
+    const inputsContainer = document.getElementById("inputs-container");
+    const getLocationButton = document.getElementById("get-location-btn");
+
+    // Insert the autocomplete element after the "Get Current Location" button
+    inputsContainer.insertBefore(placeAutocomplete, getLocationButton.nextSibling);
+    placeAutocomplete.classList.add("autocomplete-widget"); // Add a custom class
+
+    return placeAutocomplete; // Return for further manipulation if needed
+}

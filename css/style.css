@@ -129,6 +129,10 @@ body {
     border-color: #8b9298; /* Matches the text color */
 }
 
+.autocomplete-widget {
+    margin-bottom: 10px; /* Match the surrounding button margin */
+}
+
 #edit-location-btn {
     background: none;
     width: 100%;

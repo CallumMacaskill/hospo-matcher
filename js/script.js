@@ -1,8 +1,26 @@
-import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility } from './dom.js';
-import { getSession, createSession, updateSession } from './api.js';
+import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete } from './dom.js';
+import { getSession, createSession, updateSession, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
 import { getLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
+
+// Load Maps Platform API
+const response = await getMapsPlatformValue();
+await loadGoogleMapsApi(response['open_sesame']);
+
+// Initialise autocomplete widget
+const placeAutocomplete = initializeAutocomplete();
+
+// Add the gmp-placeselect listener, and display the results.
+placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
+    await place.fetchFields({
+        fields: ["location"],
+    });
+    console.log(`Selected place: ${JSON.stringify(place.toJSON())}`)
+
+    // Trigger input processing
+    await processLocationInput(place.location.lat(), place.location.lng(), place.id)
+});
 
 // Load current user's browser data
 var currentUserData = new CurrentUserData()
@@ -58,19 +76,20 @@ async function evaluateSession(session) {
     elements.midpointText.innerText = midpointResult;
 }
 
-async function processUserSessionInput() {
-    const MIN_LOADING_TIME = 300; // in milliseconds
-
+async function getCurrentLocationHandler() {
     const { latitude, longitude } = await getLocation();
-    console.log(`Loaded coordinates: ${latitude}, ${longitude}`)
+    processLocationInput(latitude, longitude);
+}
 
+async function processLocationInput(latitude, longitude, placeId) {
+    const MIN_LOADING_TIME = 300; // in milliseconds
     const timeStart = performance.now()
 
     setLoadingVisibility(true)
 
     if (!currentUserData.getSessionCode()) {
         console.log('Creating new session.')
-        const response = await createSession(currentUserData.getOrCreateUserId(), latitude, longitude);
+        const response = await createSession(currentUserData.getOrCreateUserId(), latitude, longitude, placeId);
         console.log('Created new session')
 
         // Update current data with new session values
@@ -90,7 +109,8 @@ async function processUserSessionInput() {
             currentUserData.getSessionCode(),
             currentUserData.getOrCreateUserId(),
             latitude,
-            longitude
+            longitude,
+            placeId
         );
         session = response['session']
         evaluateSession(session);
@@ -99,7 +119,7 @@ async function processUserSessionInput() {
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
     const timeRemaining = MIN_LOADING_TIME - timeElapsed;
-    if ( timeRemaining > 0 ) {
+    if (timeRemaining > 0) {
         console.log(`Waiting additional ${timeRemaining}ms.`);
         await new Promise((resolve) => setTimeout(resolve, timeRemaining));
     }
@@ -125,7 +145,7 @@ function shareLink() {
 }
 
 // Add event listeners to HTML elements
-elements.getLocationBtn.addEventListener("click", processUserSessionInput);
+elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
 elements.shareLinkBtn.addEventListener("click", shareLink);
 elements.editLocationBtn.addEventListener('click', () => {
     elements.editLocationBtn.classList.add('hidden');

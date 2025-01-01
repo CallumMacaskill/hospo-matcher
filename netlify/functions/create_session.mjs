@@ -10,19 +10,30 @@ export const handler = async (event) => {
     const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters
     var { longitude } = event.queryStringParameters
+    const { placeId } = event.queryStringParameters
 
     // Convert query string to a decimal
     latitude = parseFloat(latitude)
     longitude = parseFloat(longitude)
 
+    // Get current UTC datetime
+    const datetime = new Date(); // ISO string in UTC
+
+    // Construct user coordinates element
     session = {
         "code": uuid,
+        "created_at": datetime,
         "user_coordinates": {
             [userId]: {
                 "latitude": latitude,
                 "longitude": longitude
             }
         }
+    }
+
+    // Add place ID if available
+    if ( placeId ) {
+        session['user_coordinates'][userId]['place_id'] = placeId;
     }
     console.log(session);
 
