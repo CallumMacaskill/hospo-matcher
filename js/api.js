@@ -14,8 +14,8 @@ export async function createSession(userId, latitude, longitude, placeId) {
     return fetchData(url);
 }
 
-export async function updateSession(sessionCode, userId, latitude, longitude, placeId) {
-    var url = `/.netlify/functions/update_session?code=${sessionCode}&userId=${userId}&latitude=${latitude}&longitude=${longitude}`;
+export async function addSessionLocation(sessionCode, userId, latitude, longitude, placeId) {
+    var url = `/.netlify/functions/add_session_location?code=${sessionCode}&userId=${userId}&latitude=${latitude}&longitude=${longitude}`;
     if ( placeId ) {
         url = url.concat(`&placeId=${placeId}`);
         console.log(`Made new url ${url}`)

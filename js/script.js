@@ -1,5 +1,5 @@
 import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete } from './dom.js';
-import { getSession, createSession, updateSession, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
+import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
 import { getLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
@@ -59,15 +59,18 @@ refreshPageSubheading(
 setLoadingVisibility(false)
 
 async function evaluateSession(session) {
-    let midpointResult = "Only one location submitted. Invite friends to find your midpoint."
-    const numLocations = Object.keys(session['user_coordinates']).length
+    let midpointResult = "Only one location submitted. Add more or invite friends to find your midpoint."
+
+    // Calculate the number of locations submitted
+    const numLocations = Object.values(session.user_coordinates).reduce((sum, list) => sum + list.length, 0);
+
     if (numLocations > 1) {
         console.log('Calculating midpoint of all session users.')
-        const midpoint = calculateMidpoint(session);
+        const midpoint = calculateMidpoint(session, numLocations);
         console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
 
         // Update midpoint element text
-        midpointResult = `Your meetup midpoint between ${numLocations} locations is ${midpoint.latitude}, ${midpoint.longitude}`;
+        midpointResult = `Your meetup's midpoint between ${numLocations} locations is ${midpoint.latitude}, ${midpoint.longitude}`;
 
         console.log(`Fetching Nearby Places results.`)
         const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
@@ -104,8 +107,8 @@ async function processLocationInput(latitude, longitude, placeId) {
         );
 
     } else {
-        console.log(`Updating session with current user's location`)
-        const response = await updateSession(
+        console.log(`Adding current user's new location input to session`)
+        const response = await addSessionLocation(
             currentUserData.getSessionCode(),
             currentUserData.getOrCreateUserId(),
             latitude,

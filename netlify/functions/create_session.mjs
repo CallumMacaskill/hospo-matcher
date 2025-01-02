@@ -20,22 +20,21 @@ export const handler = async (event) => {
     const datetime = new Date(); // ISO string in UTC
 
     // Construct user coordinates element
+    var location = {
+        "latitude": latitude,
+        "longitude": longitude
+    }
+    if (placeId) {
+        location['place_id'] = placeId
+    }
+
     session = {
         "code": uuid,
         "created_at": datetime,
         "user_coordinates": {
-            [userId]: {
-                "latitude": latitude,
-                "longitude": longitude
-            }
+            [userId]: [location]
         }
     }
-
-    // Add place ID if available
-    if ( placeId ) {
-        session['user_coordinates'][userId]['place_id'] = placeId;
-    }
-    console.log(session);
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
@@ -46,9 +45,9 @@ export const handler = async (event) => {
     console.log("Inserted document")
 
     return {
-		statusCode: 200,
-		body: JSON.stringify({
-			session: session
-		})
-	}
+        statusCode: 200,
+        body: JSON.stringify({
+            session: session
+        })
+    }
 }

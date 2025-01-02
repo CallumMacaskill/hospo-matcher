@@ -23,7 +23,7 @@ export const handler = async (event) => {
     }
   };
 
-  if ( placeId ) {
+  if (placeId) {
     update_body[`user_coordinates.${userId}`]['place_id'] = placeId;
   }
   console.log(`update body: ${update_body}`);
@@ -35,10 +35,10 @@ export const handler = async (event) => {
   // Submit update session request
   const filter = { "code": code }
   const update = {
-    "$set": update_body
+    "$push": update_body
   };
 
-  updateResult = await collection.updateOne(filter, update);
+  updateResult = await collection.updateOne(filter, update, upsert=true);
 
   // Get new session data and return upon success
   if (updateResult['modifiedCount'] == 1) {
