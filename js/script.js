@@ -1,6 +1,6 @@
 import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete } from './dom.js';
 import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
-import { getLocation } from './geolocation.js';
+import { getLocation, reverseGeocodeAddress } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
 

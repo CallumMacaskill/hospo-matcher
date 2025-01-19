@@ -34,4 +34,5 @@ export async function loadGoogleMapsApi(apiKey) {
         v: "beta",
     });
     await google.maps.importLibrary("places");
+    await google.maps.importLibrary("geocoding");
 }
