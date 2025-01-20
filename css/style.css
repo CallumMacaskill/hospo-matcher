@@ -175,6 +175,45 @@ body {
     color: #555;
 }
 
+#address-list-container {
+    padding: 10px;
+    margin-bottom: 10px;
+}
+
+#address-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.address-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 5px;
+    background-color: #f9f9f9;
+}
+
+.address-item span {
+    font-size: 14px;
+    color: #555;
+}
+
+.address-item button {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.address-item button:hover {
+    color: #ff0000;
+}
+
 .popup {
     visibility: hidden;
     opacity: 0;

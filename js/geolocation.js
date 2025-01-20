@@ -16,7 +16,7 @@ export function getLocation() {
     });
 }
 
-export async function reverseGeocodeAddress(latitude, longitude, placeId) {
+export async function reverseGeocodeLocation(location) {
     if (!google || !google.maps || !google.maps.Geocoder) {
         console.error("Google Maps API not loaded");
         return;
@@ -25,10 +25,10 @@ export async function reverseGeocodeAddress(latitude, longitude, placeId) {
     const geocoder = new google.maps.Geocoder();
     var geocodeArgs = {};
 
-    if (placeId) {
-        geocodeArgs.placeId = placeId;
-    } else if (latitude && longitude) {
-        geocodeArgs.location = { lat: latitude, lng: longitude };
+    if ("place_id" in location) {
+        geocodeArgs.placeId = location["place_id"];
+    } else if ("latitude" in location && "longitude" in location) {
+        geocodeArgs.location = { lat: location["latitude"], lng: location["longitude"] };
     }
 
     try {

@@ -1,6 +1,6 @@
-import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete } from './dom.js';
+import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
 import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
-import { getLocation, reverseGeocodeAddress } from './geolocation.js';
+import { getLocation, reverseGeocodeLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
 
@@ -37,10 +37,24 @@ if (currentUserData.getSessionCode()) {
 if (session) {
     const user_ids = Object.keys(session['user_coordinates'])
     if (user_ids.includes(currentUserData.getOrCreateUserId())) {
+        const user_locations = session['user_coordinates'][currentUserData.getOrCreateUserId()]
+
         // Offer changing location data
         elements.editLocationBtn.classList.remove('hidden')
         elements.getLocationBtn.classList.add('hidden');
         elements.shareLinkBtn.classList.remove('hidden');
+
+        // Map each userId to a promise that eventually fulfills with the address
+        const promises = user_locations.map(async (location) => {
+            const address = await reverseGeocodeLocation(location);
+            return address;
+        });
+        
+        // Wait for all promises to fulfill
+        const addresses = await Promise.all(promises);
+
+        // Show user's previous location inputs
+        populateAddressList(user_locations, addresses)
 
         // Calculate midpoint, show results, show link button
         evaluateSession(session)

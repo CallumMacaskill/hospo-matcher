@@ -96,3 +96,42 @@ export function initializeAutocomplete() {
 
     return placeAutocomplete; // Return for further manipulation if needed
 }
+
+export function populateAddressList(locations, addresses) {
+    // TODO: check that lists are the same length
+
+    // Clear the existing list
+    const addressList = document.getElementById("address-list");
+    addressList.innerHTML = "";
+
+    // Populate the list dynamically
+    for (let i = 0; i < locations.length; i++) {
+        // Create list item
+        const listItem = document.createElement("li");
+        listItem.className = "address-item";
+
+        // Address text
+        const addressText = document.createElement("span");
+        addressText.textContent = addresses[i];
+
+        // Delete button
+        const deleteButton = document.createElement("button");
+        deleteButton.textContent = "X";
+
+        // Attach the location index as a data attribute
+        deleteButton.dataset.index = i;
+
+        // Attach event listener
+        deleteButton.addEventListener("click", (event) => {
+            const locationIndex = event.target.dataset.index;
+            console.log("'Deleting' location:", locations[locationIndex]);
+        });
+
+        // Append address text and delete button to the list item
+        listItem.appendChild(addressText);
+        listItem.appendChild(deleteButton);
+
+        // Add list item to the address list container
+        addressList.appendChild(listItem);
+    }
+}
