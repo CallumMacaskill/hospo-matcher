@@ -18,7 +18,14 @@ export async function addSessionLocation(sessionCode, userId, latitude, longitud
     var url = `/.netlify/functions/add_session_location?code=${sessionCode}&userId=${userId}&latitude=${latitude}&longitude=${longitude}`;
     if ( placeId ) {
         url = url.concat(`&placeId=${placeId}`);
-        console.log(`Made new url ${url}`)
+    }
+    return fetchData(url);
+}
+
+export async function deleteSessionLocation(sessionCode, userId, latitude, longitude, placeId) {
+    var url = `/.netlify/functions/delete_session_location?code=${sessionCode}&userId=${userId}&latitude=${latitude}&longitude=${longitude}`;
+    if ( placeId ) {
+        url = url.concat(`&placeId=${placeId}`);
     }
     return fetchData(url);
 }

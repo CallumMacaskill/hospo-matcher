@@ -1,3 +1,5 @@
+import { deleteSessionLocation } from './api.js';
+
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
     mainContainer: document.getElementById('main-container'),
@@ -97,7 +99,7 @@ export function initializeAutocomplete() {
     return placeAutocomplete; // Return for further manipulation if needed
 }
 
-export function populateAddressList(locations, addresses) {
+export function populateAddressList(sessionCode, userId, locations, addresses) {
     // TODO: check that lists are the same length
 
     // Clear the existing list
@@ -121,12 +123,19 @@ export function populateAddressList(locations, addresses) {
         // Attach the location index as a data attribute
         deleteButton.dataset.index = i;
 
-        // Attach event listener
-        deleteButton.addEventListener("click", (event) => {
+        // Add event listeners
+        deleteButton.addEventListener("click", async (event) => {
             const locationIndex = event.target.dataset.index;
-            console.log("'Deleting' location:", locations[locationIndex]);
-        });
 
+            await deleteSessionLocation(
+                sessionCode,
+                userId,
+                String(locations[locationIndex]["latitude"]),
+                String(locations[locationIndex]["longitude"])
+            );
+            location.reload();
+        });
+        
         // Append address text and delete button to the list item
         listItem.appendChild(addressText);
         listItem.appendChild(deleteButton);

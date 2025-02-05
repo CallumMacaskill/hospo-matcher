@@ -54,7 +54,7 @@ if (session) {
         const addresses = await Promise.all(promises);
 
         // Show user's previous location inputs
-        populateAddressList(user_locations, addresses)
+        populateAddressList(currentUserData.getSessionCode(), currentUserData.getOrCreateUserId(), user_locations, addresses)
 
         // Calculate midpoint, show results, show link button
         evaluateSession(session)
