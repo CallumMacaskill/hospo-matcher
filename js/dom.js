@@ -20,8 +20,8 @@ export function refreshPageSubheading(session, sessionCode, userId) {
         const code_substring = sessionCode.substring(0, 6);
 
         // Check if user has already submitted location
-        const user_ids = Object.keys(session['user_coordinates'])
-        if (user_ids.includes(userId)) {
+        const userLocations = session['user_coordinates'][userId];
+        if (userLocations && userLocations.length > 0) {
             page_description = `You've joined meetup #${code_substring}`;
         } else {
             page_description = `You're joining meetup #${code_substring}`;
@@ -125,6 +125,7 @@ export function populateAddressList(sessionCode, userId, locations, addresses) {
 
         // Add event listeners
         deleteButton.addEventListener("click", async (event) => {
+            setLoadingVisibility(true)
             const locationIndex = event.target.dataset.index;
 
             await deleteSessionLocation(
@@ -133,6 +134,7 @@ export function populateAddressList(sessionCode, userId, locations, addresses) {
                 String(locations[locationIndex]["latitude"]),
                 String(locations[locationIndex]["longitude"])
             );
+            setLoadingVisibility(true)
             location.reload();
         });
         

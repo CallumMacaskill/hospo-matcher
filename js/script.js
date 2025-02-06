@@ -35,26 +35,17 @@ if (currentUserData.getSessionCode()) {
 
 // Check if user has already submitted location
 if (session) {
-    const user_ids = Object.keys(session['user_coordinates'])
-    if (user_ids.includes(currentUserData.getOrCreateUserId())) {
-        const user_locations = session['user_coordinates'][currentUserData.getOrCreateUserId()]
+    const userId = currentUserData.getOrCreateUserId();
+    const userLocations = session['user_coordinates'][userId];
 
+    if (userLocations && userLocations.length > 0) {
+        console.log(`User locations length: ${userLocations.length}`)
         // Offer changing location data
         elements.editLocationBtn.classList.remove('hidden')
         elements.getLocationBtn.classList.add('hidden');
         elements.shareLinkBtn.classList.remove('hidden');
 
-        // Map each userId to a promise that eventually fulfills with the address
-        const promises = user_locations.map(async (location) => {
-            const address = await reverseGeocodeLocation(location);
-            return address;
-        });
-        
-        // Wait for all promises to fulfill
-        const addresses = await Promise.all(promises);
-
-        // Show user's previous location inputs
-        populateAddressList(currentUserData.getSessionCode(), currentUserData.getOrCreateUserId(), user_locations, addresses)
+        generateInputList(userLocations)
 
         // Calculate midpoint, show results, show link button
         evaluateSession(session)
@@ -93,6 +84,20 @@ async function evaluateSession(session) {
     elements.midpointText.innerText = midpointResult;
 }
 
+async function generateInputList(userLocations) {
+    // Map each userId to a promise that eventually fulfills with the address
+    const promises = userLocations.map(async (location) => {
+        const address = await reverseGeocodeLocation(location);
+        return address;
+    });
+    
+    // Wait for all promises to fulfill
+    const addresses = await Promise.all(promises);
+
+    // Show user's previous location inputs
+    populateAddressList(currentUserData.getSessionCode(), currentUserData.getOrCreateUserId(), userLocations, addresses)
+}
+
 async function getCurrentLocationHandler() {
     const { latitude, longitude } = await getLocation();
     processLocationInput(latitude, longitude);
@@ -113,6 +118,9 @@ async function processLocationInput(latitude, longitude, placeId) {
         session = response['session']
         currentUserData.setSessionCode(session['code'])
 
+        const newUrl = `${window.location.origin}${window.location.pathname}?code=${currentUserData.getSessionCode()}`;
+        history.replaceState(null, "", newUrl);
+
         // Update page context after creating session
         refreshPageSubheading(
             session,
@@ -130,8 +138,12 @@ async function processLocationInput(latitude, longitude, placeId) {
             placeId
         );
         session = response['session']
+
         evaluateSession(session);
     }
+
+    // Show user's previous location inputs
+    generateInputList(session["user_coordinates"][currentUserData.getOrCreateUserId()])
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
