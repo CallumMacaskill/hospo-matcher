@@ -40,10 +40,6 @@ if (session) {
 
     if (userLocations && userLocations.length > 0) {
         console.log(`User locations length: ${userLocations.length}`)
-        // Offer changing location data
-        elements.editLocationBtn.classList.remove('hidden')
-        elements.getLocationBtn.classList.add('hidden');
-        elements.shareLinkBtn.classList.remove('hidden');
 
         generateInputList(userLocations)
 

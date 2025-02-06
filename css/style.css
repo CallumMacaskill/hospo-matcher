@@ -32,13 +32,19 @@ body {
     right: 0;
     bottom: 0;
     display: flex;
-    justify-content: center; /* Center horizontally */
-    align-items: flex-start; /* Align to the top */
+    justify-content: center;
+    /* Center horizontally */
+    align-items: flex-start;
+    /* Align to the top */
     z-index: 1000;
-    background-color: rgba(255, 255, 255, 0.7); /* Semi-transparent background */
-    visibility: hidden; /* Hidden by default */
-    pointer-events: none; /* Allow clicks to pass through */
-    padding-top: 10%; /* Adjust this value to control vertical positioning */
+    background-color: rgba(255, 255, 255, 0.7);
+    /* Semi-transparent background */
+    visibility: hidden;
+    /* Hidden by default */
+    pointer-events: none;
+    /* Allow clicks to pass through */
+    padding-top: 10%;
+    /* Adjust this value to control vertical positioning */
 }
 
 /* Loading spinner style */
@@ -63,8 +69,10 @@ body {
 
 /* Show the loading spinner when it's active */
 #loading-spinner-container.show {
-    visibility: visible; /* Show the spinner */
-    pointer-events: all; /* Enable interaction with the spinner */
+    visibility: visible;
+    /* Show the spinner */
+    pointer-events: all;
+    /* Enable interaction with the spinner */
 }
 
 
@@ -99,14 +107,18 @@ body {
 /* General Button Styles */
 .btn {
     display: block;
-    width: 100%; /* Full width */
+    width: 100%;
+    /* Full width */
     padding: 15px;
     font-size: 16px;
     border: none;
-    border-radius: 6px; /* Consistent rounded corners */
+    border-radius: 6px;
+    /* Consistent rounded corners */
     cursor: pointer;
-    margin-bottom: 10px; /* Space between buttons */
-    transition: all 0.3s ease; /* Smooth transitions for all properties */
+    margin-bottom: 10px;
+    /* Space between buttons */
+    transition: all 0.3s ease;
+    /* Smooth transitions for all properties */
 }
 
 /* Primary Button */
@@ -119,38 +131,22 @@ body {
 .btn.secondary {
     background-color: #8b9298;
     color: white;
-    border: 2px solid transparent; /* Transparent border for consistent sizing */
+    border: 2px solid transparent;
+    /* Transparent border for consistent sizing */
 }
 
 /* Secondary Button 'Clicked' State */
 .btn.secondary.inverted {
     background-color: white;
     color: #8b9298;
-    border-color: #8b9298; /* Matches the text color */
+    border-color: #8b9298;
+    /* Matches the text color */
 }
 
 .autocomplete-widget {
-    margin-bottom: 10px; /* Match the surrounding button margin */
+    margin-bottom: 10px;
+    /* Match the surrounding button margin */
 }
-
-#edit-location-btn {
-    background: none;
-    width: 100%;
-    border: none;
-    color: #007bff;
-    text-decoration: underline;
-    font-size: 1rem;
-    cursor: pointer;
-    margin-top: 0.5rem;
-    margin-bottom: 2rem;
-    padding: 0;
-  }
-  
-  #edit-location-btn:hover {
-    color: #0056b3; /* Darker blue for hover effect */
-    text-decoration: none; /* Removes underline on hover for a subtle effect */
-  }
-  
 
 /* Places List */
 .places-list {
@@ -218,8 +214,8 @@ body {
     visibility: hidden;
     opacity: 0;
     transition: opacity 200ms ease-in, visibility 0ms ease-in 200ms;
-  }
-  
+}
+
 .popup.show {
     visibility: visible;
     opacity: 1;
