@@ -3,13 +3,15 @@ import { deleteSessionLocation } from './api.js';
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
     mainContainer: document.getElementById('main-container'),
-    inputsContainer: document.getElementById('inputs-container'),
+    inputsSection: document.getElementById('inputs-section'),
+    inputsWrapper: document.getElementById('inputs-wrapper'),
     pageDescription: document.getElementById('page-description'),
     getLocationBtn: document.getElementById("get-location-btn"),
-    editLocationBtn: document.getElementById("edit-location-btn"),
     shareLinkBtn: document.getElementById("share-link-btn"),
-    resultsContainer: document.getElementById("results-container"),
+    resultsSection: document.getElementById("results-section"),
     midpointText: document.getElementById("midpoint-text"),
+    shareMidpointBtn: document.getElementById('share-midpoint-btn'),
+    placesText: document.getElementById('places-text'),
     placesList: document.getElementById("places-list"),
 };
 
@@ -58,10 +60,27 @@ export function invertShareLinkStyling() {
 
     // Revert button state after 2 seconds
     setTimeout(() => {
-        elements.shareLinkBtn.textContent = 'Share Link';
+        elements.shareLinkBtn.textContent = 'Share Meetup';
         elements.shareLinkBtn.classList.remove('inverted');
         elements.shareLinkBtn.disabled = false;
-    }, 2000);
+    }, 1500);
+}
+
+export function invertShareAddressStyling() {
+    // Midpoint address
+    const address = elements.shareMidpointBtn.textContent;
+
+    // Update button appearance and disable it
+    elements.shareMidpointBtn.textContent = 'Copied!';
+    elements.shareMidpointBtn.classList.add('inverted');
+    elements.shareMidpointBtn.disabled = true;
+
+    // Revert button state after 2 seconds
+    setTimeout(() => {
+        elements.shareMidpointBtn.textContent = address;
+        elements.shareMidpointBtn.classList.remove('inverted');
+        elements.shareMidpointBtn.disabled = false;
+    }, 1500);
 }
 
 export function setVisibility(element, show) {
@@ -73,6 +92,7 @@ export function setVisibility(element, show) {
 }
 
 export async function setLoadingVisibility(show) {
+    console.log(`Changing vis to ${show}`)
     if (show) {
         setVisibility(elements.mainContainer, false)
         await new Promise((resolve) => setTimeout(resolve, 100));
@@ -88,14 +108,9 @@ export function initializeAutocomplete() {
     // Create the Place Autocomplete Element
     const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
 
-    // Add it below the "Get Current Location" button
-    const inputsContainer = document.getElementById("inputs-container");
-    const getLocationButton = document.getElementById("get-location-btn");
-
     // Insert the autocomplete element after the "Get Current Location" button
-    inputsContainer.insertBefore(placeAutocomplete, getLocationButton.nextSibling);
+    elements.inputsWrapper.insertBefore(placeAutocomplete, elements.getLocationBtn.nextSibling);
     placeAutocomplete.classList.add("autocomplete-widget"); // Add a custom class
-
     return placeAutocomplete; // Return for further manipulation if needed
 }
 
@@ -114,7 +129,7 @@ export function populateAddressList(sessionCode, userId, locations, addresses) {
 
         // Address text
         const addressText = document.createElement("span");
-        addressText.textContent = addresses[i];
+        addressText.textContent = `📍 ${addresses[i]}`;
 
         // Delete button
         const deleteButton = document.createElement("button");

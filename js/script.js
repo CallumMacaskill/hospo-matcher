@@ -1,8 +1,9 @@
-import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
+import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
 import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
 import { getLocation, reverseGeocodeLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
+console.log('o')
 
 // Load Maps Platform API
 const response = await getMapsPlatformValue();
@@ -41,11 +42,13 @@ if (session) {
     if (userLocations && userLocations.length > 0) {
         console.log(`User locations length: ${userLocations.length}`)
 
-        generateInputList(userLocations)
+        await generateInputList(userLocations)
+
+        elements.shareLinkBtn.classList.remove('hidden');
 
         // Calculate midpoint, show results, show link button
-        evaluateSession(session)
-        elements.resultsContainer.classList.add("show")
+        await evaluateSession(session)
+        elements.resultsSection.classList.add("show")
     }
 }
 
@@ -58,24 +61,33 @@ refreshPageSubheading(
 
 // Show main content and hide loading spinner
 setLoadingVisibility(false)
+console.log('Showing main')
 
 async function evaluateSession(session) {
     let midpointResult = "Only one location submitted. Add more or invite friends to find your midpoint."
 
     // Calculate the number of locations submitted
     const numLocations = Object.values(session.user_coordinates).reduce((sum, list) => sum + list.length, 0);
+    console.log(numLocations)
 
     if (numLocations > 1) {
+        // Calculate midpoint coordinates
         console.log('Calculating midpoint of all session users.')
         const midpoint = calculateMidpoint(session, numLocations);
         console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
 
         // Update midpoint element text
-        midpointResult = `Your meetup's midpoint between ${numLocations} locations is ${midpoint.latitude}, ${midpoint.longitude}`;
+        midpointResult = `Your midpoint between ${numLocations} locations`;
+
+        // Populate button with address from coordinates
+        const address = await reverseGeocodeLocation(midpoint);
+        elements.shareMidpointBtn.innerHTML = address
+        elements.shareMidpointBtn.classList.add('show')
 
         console.log(`Fetching Nearby Places results.`)
         const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
         generatePlacesElements(placesData);
+        elements.placesText.classList.add('show')
     }
     elements.midpointText.innerText = midpointResult;
 }
@@ -151,7 +163,7 @@ async function processLocationInput(latitude, longitude, placeId) {
 
     // Upon success, prompt user to share with friends
     elements.shareLinkBtn.classList.remove('hidden');
-    elements.resultsContainer.classList.add('show');
+    elements.resultsSection.classList.add('show');
     setLoadingVisibility(false)
 }
 
@@ -169,10 +181,16 @@ function shareLink() {
     }
 }
 
+function shareAddress() {
+    // Copy link to clipboard
+    navigator.clipboard.writeText(elements.shareMidpointBtn.textContent).then(() => {
+        invertShareAddressStyling()
+    }).catch(err => {
+        console.error('Failed to copy text:', err);
+    });
+}
+
 // Add event listeners to HTML elements
 elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
 elements.shareLinkBtn.addEventListener("click", shareLink);
-elements.editLocationBtn.addEventListener('click', () => {
-    elements.editLocationBtn.classList.add('hidden');
-    elements.getLocationBtn.classList.remove('hidden');
-});
+elements.shareMidpointBtn.addEventListener("click", shareAddress);
