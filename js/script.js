@@ -136,6 +136,8 @@ async function processLocationInput(latitude, longitude, placeId) {
             currentUserData.getOrCreateUserId()
         );
 
+        elements.midpointText.innerText = "Only one location submitted. Add more or invite friends to find your midpoint.";
+
     } else {
         console.log(`Adding current user's new location input to session`)
         const response = await addSessionLocation(
@@ -147,11 +149,11 @@ async function processLocationInput(latitude, longitude, placeId) {
         );
         session = response['session']
 
-        evaluateSession(session);
+        await evaluateSession(session);
     }
 
     // Show user's previous location inputs
-    generateInputList(session["user_coordinates"][currentUserData.getOrCreateUserId()])
+    await generateInputList(session["user_coordinates"][currentUserData.getOrCreateUserId()])
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;

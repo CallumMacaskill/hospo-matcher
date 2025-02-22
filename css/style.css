@@ -167,7 +167,8 @@ body {
     font-weight: 400;
     color: #555;
     min-height: 100vh;
-    display: block; /* Ensure normal vertical flow */
+    display: flex;
+    flex-direction: column;
     text-align: center; /* Keep inline elements centered */
 }
 
@@ -185,16 +186,6 @@ h2 {
     display: block; /* Prevent flex behavior */
 }
 
-/* Modifier for inputs section */
-.inputs-section {
-    background: white;
-}
-
-/* Modifier for results section */
-.results-section {
-    background: #F3F3F3;
-}
-
 /* Wrapper to keep content centered */
 .content-wrapper {
     width: 100%;
@@ -202,6 +193,24 @@ h2 {
     border-radius: 8px;
     padding: 20px;
     margin: 0 auto;
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Modifier for inputs section */
+.inputs-section {
+    background: white;
+    flex-grow: 0;
+}
+
+/* Modifier for results section */
+.results-section {
+    background: #F3F3F3;
+    flex-grow: 1;
 }
 
 /* Container for loading spinner */
@@ -275,6 +284,10 @@ h2 {
     /* Add space below the description */
 }
 
+#share-link-btn {
+    margin-top: 40px;
+}
+
 .midpoint-text {
     font-size: 16px;
     font-weight: 800;
@@ -290,7 +303,6 @@ h2 {
     font-weight: 700;
     display: block;
     width: 100%;
-    /* Full width */
     padding: 15px;
     border: 2px solid transparent;
     white-space: nowrap;
@@ -299,9 +311,7 @@ h2 {
     border-radius: 100vmax;;
     cursor: pointer;
     margin-bottom: 10px;
-    /* Space between buttons */
     transition: all 0.25s ease;
-    /* Smooth transitions for all properties */
 }
 
 /* Primary Button */
@@ -310,25 +320,22 @@ h2 {
     background-color: #C9E1FF;
 }
 
-/* Primary Button */
-.btn.primary.inverted {
-    background-color: white;
-    border-color: #1576F1;
-}
-
 /* Default Secondary Button */
 .btn.secondary {
-    background-color: #1576F1;
     color: white;
-    /* Transparent border for consistent sizing */
+    background-color: #1576F1;
 }
 
-/* Secondary Button 'Clicked' State */
+/* Primary Button */
+.btn.primary.inverted,
 .btn.secondary.inverted {
-    background-color: white;
     color: #1576F1;
     border-color: #1576F1;
-    /* Matches the text color */
+    background-color: white;
+}
+
+.btn.primary.popup {
+    transition: all 0.25s ease;
 }
 
 .autocomplete-widget {
@@ -422,7 +429,6 @@ h2 {
     transition-delay: 0ms;
 }
 
-/* Utility class to hide elements after fading out */
 .hidden {
     display: none;
 }
