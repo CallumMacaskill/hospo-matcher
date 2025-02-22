@@ -172,7 +172,7 @@ async function processLocationInput(latitude, longitude, placeId) {
 function shareLink() {
     // Require active session code to share link
     if (currentUserData.getSessionCode()) {
-        const url = `http://localhost:8888/?code=${currentUserData.getSessionCode()}`;
+        const url = `https://hospomatcher.netlify.app/?code=${currentUserData.getSessionCode()}`;
 
         // Copy link to clipboard
         navigator.clipboard.writeText(url).then(() => {
