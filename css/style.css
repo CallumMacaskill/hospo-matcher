@@ -161,6 +161,11 @@
     box-sizing: border-box;
 }
 
+html,body{
+    -webkit-overflow-scrolling : touch !important;
+    overflow: auto !important;
+}
+
 /* Body Styles */
 body {
     font-family: 'Public Sans', sans-serif;
@@ -168,7 +173,6 @@ body {
     color: #555;
     min-height: 100vh;
     display: flex;
-    margin-top:50px;
     flex-direction: column;
     text-align: center; /* Keep inline elements centered */
 }
