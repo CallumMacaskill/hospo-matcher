@@ -232,14 +232,14 @@ h2 {
     /* Hidden by default */
     pointer-events: none;
     /* Allow clicks to pass through */
-    padding-top: 10%;
+    padding-top: 112px;
     /* Adjust this value to control vertical positioning */
 }
 
 /* Loading spinner style */
 #loading-spinner {
     border: 8px solid #f3f3f3;
-    border-top: 8px solid #3498db;
+    border-top: 8px solid #1576F1;
     border-radius: 50%;
     width: 35px;
     height: 35px;
