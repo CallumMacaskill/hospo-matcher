@@ -110,7 +110,6 @@ export function initializeAutocomplete() {
 
     // Insert the autocomplete element after the "Get Current Location" button
     elements.inputsWrapper.insertBefore(placeAutocomplete, elements.getLocationBtn.nextSibling);
-    placeAutocomplete.classList.add("autocomplete-widget"); // Add a custom class
     return placeAutocomplete; // Return for further manipulation if needed
 }
 

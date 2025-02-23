@@ -338,10 +338,6 @@ h2 {
     transition: all 0.25s ease;
 }
 
-.autocomplete-widget {
-    margin-bottom: 10px;
-    /* Match the surrounding button margin */
-}
 
 /* Places List */
 .places-text {
