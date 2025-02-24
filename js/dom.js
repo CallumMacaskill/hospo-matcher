@@ -112,7 +112,7 @@ export function initializeAutocomplete() {
         setTimeout(() => {
             console.log('focused...');
             // Scroll to the top of the page
-            window.scrollTo(0, 100);
+            window.scrollTo(0, 0);
         }, 50); // Delay to accommodate viewport resizing
     });
 
