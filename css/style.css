@@ -173,12 +173,9 @@ body {
     /* Keep inline elements centered */
 }
 
-input:focus, textarea:focus {
-    position: fixed;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
+html,body{
+    -webkit-overflow-scrolling : touch !important;
+    overflow: auto !important;
 }
 
 h1 {
