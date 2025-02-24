@@ -116,7 +116,7 @@ export function initializeAutocomplete() {
                 top: 0,
                 behavior: "smooth" // Smooth scroll to top
             });
-        }, 100); // Delay to accommodate viewport resizing
+        }, 1000); // Delay to accommodate viewport resizing
     });
 
 
