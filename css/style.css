@@ -163,6 +163,7 @@
 
 html,body{
     -webkit-overflow-scrolling : touch !important;
+    height: 100%;
     overflow: auto !important;
 }
 
