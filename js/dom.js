@@ -109,9 +109,11 @@ export function initializeAutocomplete() {
     const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
 
     // Insert the autocomplete element after the "Get Current Location" button
-    elements.inputsWrapper.insertBefore(placeAutocomplete, elements.getLocationBtn.nextSibling);
+    elements.inputsWrapper.appendChild(placeAutocomplete)
+
     return placeAutocomplete; // Return for further manipulation if needed
 }
+
 
 export function populateAddressList(sessionCode, userId, locations, addresses) {
     // TODO: check that lists are the same length
