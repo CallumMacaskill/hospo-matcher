@@ -108,17 +108,16 @@ export function initializeAutocomplete() {
     // Create the Place Autocomplete Element
     const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
 
-    placeAutocomplete.addEventListener("input", function () {
+    placeAutocomplete.addEventListener("focus", function () {
         setTimeout(() => {
-            console.log('inputting...');
+            console.log('focused...');
             // Scroll to the top of the page
             window.scrollTo({
                 top: 0,
                 behavior: "smooth" // Smooth scroll to top
             });
-        }, 1000); // Delay to accommodate viewport resizing
+        }, 50); // Delay to accommodate viewport resizing
     });
-
 
     // Insert the autocomplete element after the "Get Current Location" button
     elements.inputsWrapper.appendChild(placeAutocomplete);
