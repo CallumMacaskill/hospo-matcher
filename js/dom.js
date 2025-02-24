@@ -117,7 +117,7 @@ export function initializeAutocomplete() {
     });
 
     // Insert the autocomplete element after the "Get Current Location" button
-    elements.inputsWrapper.appendChild(placeAutocomplete);
+    elements.inputsWrapper.insertBefore(placeAutocomplete, elements.getLocationBtn.nextSibling);
 
     return placeAutocomplete; // Return for further manipulation if needed
 }
