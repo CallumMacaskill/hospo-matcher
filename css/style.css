@@ -1,7 +1,438 @@
+/* Fonts */
+
+/* Regular */
+@font-face {
+    font-family: 'PT Sans Narrow';
+    src: url('../fonts/pt-sans-narrow/pt-sans_narrow-bold.woff2') format('woff2'),
+        url('../fonts/pt-sans-narrow/pt-sans_narrow-bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Regular */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Regular.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Regular.woff') format('woff');
+    font-weight: 400;
+    font-style: normal;
+}
+
+/* Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Italic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Italic.woff') format('woff');
+    font-weight: 400;
+    font-style: italic;
+}
+
+/* Thin */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Thin.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Thin.woff') format('woff');
+    font-weight: 100;
+    font-style: normal;
+}
+
+/* Thin Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-ThinItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-ThinItalic.woff') format('woff');
+    font-weight: 100;
+    font-style: italic;
+}
+
+/* Light */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Light.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Light.woff') format('woff');
+    font-weight: 300;
+    font-style: normal;
+}
+
+/* Light Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-LightItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-LightItalic.woff') format('woff');
+    font-weight: 300;
+    font-style: italic;
+}
+
+/* Medium */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Medium.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Medium.woff') format('woff');
+    font-weight: 500;
+    font-style: normal;
+}
+
+/* Medium Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-MediumItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-MediumItalic.woff') format('woff');
+    font-weight: 500;
+    font-style: italic;
+}
+
+/* SemiBold */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-SemiBold.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-SemiBold.woff') format('woff');
+    font-weight: 600;
+    font-style: normal;
+}
+
+/* SemiBold Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-SemiBoldItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-SemiBoldItalic.woff') format('woff');
+    font-weight: 600;
+    font-style: italic;
+}
+
+/* Bold */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Bold.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Bold.woff') format('woff');
+    font-weight: 700;
+    font-style: normal;
+}
+
+/* Bold Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-BoldItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-BoldItalic.woff') format('woff');
+    font-weight: 700;
+    font-style: italic;
+}
+
+/* ExtraBold */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-ExtraBold.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-ExtraBold.woff') format('woff');
+    font-weight: 800;
+    font-style: normal;
+}
+
+/* ExtraBold Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-ExtraBoldItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-ExtraBoldItalic.woff') format('woff');
+    font-weight: 800;
+    font-style: italic;
+}
+
+/* Black */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-Black.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-Black.woff') format('woff');
+    font-weight: 900;
+    font-style: normal;
+}
+
+/* Black Italic */
+@font-face {
+    font-family: 'Public Sans';
+    src: url('../fonts/public-sans/PublicSans-BlackItalic.woff2') format('woff2'),
+        url('../fonts/public-sans/PublicSans-BlackItalic.woff') format('woff');
+    font-weight: 900;
+    font-style: italic;
+}
+
+
+/* General Reset */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+/* Body Styles */
 body {
-    font-family: Arial, sans-serif;
+    font-family: 'Public Sans', sans-serif;
+    font-weight: 400;
+    color: #555;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    /* Keep inline elements centered */
+}
+
+html,body{
+    -webkit-overflow-scrolling : touch !important;
+    overflow: auto !important;
 }
 
 h1 {
-    text-decoration: underline;
+    font-weight: 700;
+}
+
+h2 {
+    font-weight: 600;
+}
+
+/* Generic section styling */
+.section {
+    width: 100%;
+    display: block;
+    /* Prevent flex behavior */
+}
+
+/* Wrapper to keep content centered */
+.content-wrapper {
+    width: 100%;
+    max-width: 400px;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 0 auto;
+}
+
+#main-container {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+/* Modifier for inputs section */
+.inputs-section {
+    background: white;
+    flex-grow: 0;
+}
+
+/* Modifier for results section */
+.results-section {
+    background: #F3F3F3;
+    flex-grow: 1;
+}
+
+/* Container for loading spinner */
+#loading-spinner-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    /* Center horizontally */
+    align-items: flex-start;
+    /* Align to the top */
+    z-index: 1000;
+    background-color: rgba(255, 255, 255, 0.7);
+    /* Semi-transparent background */
+    visibility: hidden;
+    /* Hidden by default */
+    pointer-events: none;
+    /* Allow clicks to pass through */
+    padding-top: 112px;
+    /* Adjust this value to control vertical positioning */
+}
+
+/* Loading spinner style */
+#loading-spinner {
+    border: 8px solid #f3f3f3;
+    border-top: 8px solid #1576F1;
+    border-radius: 50%;
+    width: 35px;
+    height: 35px;
+    animation: spin 1.5s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Show the loading spinner when it's active */
+#loading-spinner-container.show {
+    visibility: visible;
+    /* Show the spinner */
+    pointer-events: all;
+    /* Enable interaction with the spinner */
+}
+
+
+/* Page Heading */
+.page-heading {
+    font-family: 'PT Sans Narrow', sans-serif;
+    font-size: 36px;
+    color: black;
+    text-align: center;
+}
+
+/* Page Description */
+.page-description {
+    font-size: 16px;
+    font-weight: 700;
+    color: #1576F1;
+    text-align: center;
+    /* Center-align text */
+    margin-bottom: 20px;
+    /* Add space below the description */
+}
+
+#share-link-btn {
+    margin-top: 40px;
+}
+
+.midpoint-text {
+    font-size: 16px;
+    font-weight: 800;
+    margin-top: 16px;
+    margin-bottom: 16px;
+    text-align: center;
+}
+
+/* General Button Styles */
+.btn {
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    display: block;
+    width: 100%;
+    padding: 15px;
+    border: 2px solid transparent;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-radius: 100vmax;
+    ;
+    cursor: pointer;
+    margin-bottom: 10px;
+    transition: all 0.25s ease;
+}
+
+/* Primary Button */
+.btn.primary {
+    color: #1576F1;
+    background-color: #C9E1FF;
+}
+
+/* Default Secondary Button */
+.btn.secondary {
+    color: white;
+    background-color: #1576F1;
+}
+
+/* Primary Button */
+.btn.primary.inverted,
+.btn.secondary.inverted {
+    color: #1576F1;
+    border-color: #1576F1;
+    background-color: white;
+}
+
+.btn.primary.popup {
+    transition: all 0.25s ease;
+}
+
+/* Places List */
+.places-text {
+    font-weight: 300;
+    margin-top: 32px;
+}
+
+#places-list {
+    margin-top: 20px;
+}
+
+.place {
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    background: #f9f9f9;
+    text-align: left;
+}
+
+.place h3 {
+    font-size: 14px;
+    font-weight: 700;
+    margin-bottom: 5px;
+}
+
+.place p {
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+#address-list-container {
+    margin-bottom: 10px;
+}
+
+#address-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+}
+
+.address-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 15px;
+    padding-left: 20px;
+    padding-right: 20px;
+    border-radius: 100vmax;
+    ;
+    margin-bottom: 5px;
+    background-color: #F3F3F3;
+}
+
+.address-item span {
+    font-size: 14px;
+    color: #555;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+}
+
+.address-item button {
+    background: none;
+    border: none;
+    color: #007bff;
+    font-size: 1rem;
+    cursor: pointer;
+}
+
+.address-item button:hover {
+    color: #ff0000;
+}
+
+.popup {
+    visibility: hidden;
+    opacity: 0;
+    transition: opacity 200ms ease-in, visibility 0ms ease-in 200ms;
+}
+
+.popup.show {
+    visibility: visible;
+    opacity: 1;
+    transition-delay: 0ms;
+}
+
+.hidden {
+    display: none;
 }

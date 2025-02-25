@@ -6,16 +6,43 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Hospo Matcher</title>
   <link rel="stylesheet" href="css/style.css">
-  <script src="js/script.js" type="text/javascript"></script>
 </head>
 
 <body>
-  <h1>Nearby Places</h1>
-  <ul id="places-list"></ul> <!-- Placeholder for showing the list of places -->
-  <div class="container">
-    <button onclick="getLocation()">Get Location</button>
-    <p id="coordinates"></p> <!-- Placeholder for showing the user's coordinates -->
+  <div class="section">
+    <div class="content-wrapper">
+      <h2 class="page-heading">Midpoint</h2>
+      <div id="loading-spinner-container">
+        <div id="loading-spinner" class="spinner popup show"></div>
+      </div>
+    </div>
   </div>
+
+  <div id="main-container" class="popup">
+    <div id="inputs-section" class="section inputs-section popup show">
+      <div id="inputs-wrapper" class="content-wrapper">
+        <p id="page-description" class="page-description"></p>
+        <div id="address-list-container">
+          <ul id="address-list"></ul>
+        </div>
+        <button id="get-location-btn" class="btn primary">Use my Current Location</button>
+        <button id="share-link-btn" class="btn secondary hidden">Share Meetup</button>
+      </div>
+    </div>
+  
+    <div id="results-section" class="section results-section popup">
+      <div class="content-wrapper">
+        <p id="midpoint-text" class="midpoint-text"></p>
+        <button id="share-midpoint-btn" class="btn primary popup"></button>
+        <p id="places-text" class="places-text popup">Nearby cafes and restaurants</p>
+        <div id="places-list"></div>
+      </div>
+    </div>
+  </div>
+  
+
+  <!-- Link to external JavaScript file -->
+  <script src="js/script.js" type="module"></script>
 </body>
 
 </html>
