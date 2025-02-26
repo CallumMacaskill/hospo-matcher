@@ -1,13 +1,24 @@
 import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
 import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
-import { getLocation, reverseGeocodeLocation } from './geolocation.js';
+import { reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
+import { getLocation } from './geolocation.js';
 import { CurrentUserData, calculateMidpoint } from './session.js';
 import { fetchData } from './utils.js';
-console.log('o')
+
+const baseURL = window.location.origin + "/";
+console.log(baseURL);
 
 // Load Maps Platform API
-const response = await getMapsPlatformValue();
-await loadGoogleMapsApi(response['open_sesame']);
+let open_sesame;
+
+if (baseURL === 'http://localhost:8888/') {
+    open_sesame = prompt();
+} else {
+    const response = await getMapsPlatformValue();
+    open_sesame = response['open_sesame']
+}
+
+await loadGoogleMapsApi(open_sesame);
 
 // Initialise autocomplete widget
 const placeAutocomplete = initializeAutocomplete();
@@ -85,7 +96,7 @@ async function evaluateSession(session) {
         elements.shareMidpointBtn.classList.add('show')
 
         console.log(`Fetching Nearby Places results.`)
-        const placesData = await fetchData(`/.netlify/functions/google_maps_places_search?latitude=${midpoint.latitude}&longitude=${midpoint.longitude}`);
+        const placesData = await searchNearbyPlaces(midpoint, open_sesame);
         generatePlacesElements(placesData);
         elements.placesText.classList.add('show')
     }
@@ -172,7 +183,7 @@ async function processLocationInput(latitude, longitude, placeId) {
 function shareLink() {
     // Require active session code to share link
     if (currentUserData.getSessionCode()) {
-        const url = `https://hospomatcher.netlify.app/?code=${currentUserData.getSessionCode()}`;
+        const url = `${baseURL}?code=${currentUserData.getSessionCode()}`;
 
         // Copy link to clipboard
         navigator.clipboard.writeText(url).then(() => {
