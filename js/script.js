@@ -1,21 +1,18 @@
 import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
-import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
-import { reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
-import { getLocation } from './geolocation.js';
-import { CurrentUserData, calculateMidpoint } from './session.js';
-import { fetchData } from './utils.js';
+import { loadGoogleMapsApi, reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
+import { CurrentUserData, calculateMidpoint, generateCrudUrl } from './session.js';
 
 const baseURL = window.location.origin + "/";
-console.log(baseURL);
+console.log(baseURL)
 
 // Load Maps Platform API
 let open_sesame;
-
 if (baseURL === 'http://localhost:8888/') {
     open_sesame = prompt();
 } else {
-    const response = await getMapsPlatformValue();
-    open_sesame = response['open_sesame']
+    const response = await fetch(`/.netlify/functions/read_maps_platform_value`);
+    const data = response.json()
+    open_sesame = data['open_sesame']
 }
 
 await loadGoogleMapsApi(open_sesame);
@@ -41,7 +38,12 @@ console.log(`Using session code: ${currentUserData.getSessionCode()}`)
 // Get session data if available
 if (currentUserData.getSessionCode()) {
     console.log(`Reading session from database.`)
-    var session = await getSession(currentUserData.getSessionCode())
+    const url = generateCrudUrl('/.netlify/functions/read_session', {
+        code: currentUserData.getSessionCode()
+    });
+    console.log(`Generated url: ${url}`)
+    const response = await fetch(url)
+    var session = await response.json()
     console.log(`Read session from database.`)
 }
 
@@ -49,7 +51,6 @@ if (currentUserData.getSessionCode()) {
 if (session) {
     const userId = currentUserData.getOrCreateUserId();
     const userLocations = session['user_coordinates'][userId];
-
     if (userLocations && userLocations.length > 0) {
         console.log(`User locations length: ${userLocations.length}`)
 
@@ -118,7 +119,21 @@ async function generateInputList(userLocations) {
 }
 
 async function getCurrentLocationHandler() {
-    const { latitude, longitude } = await getLocation();
+    const { latitude, longitude } = await new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => reject(error)
+            );
+        } else {
+            reject(new Error("Geolocation not supported"));
+        }
+    });
     processLocationInput(latitude, longitude);
 }
 
@@ -130,11 +145,20 @@ async function processLocationInput(latitude, longitude, placeId) {
 
     if (!currentUserData.getSessionCode()) {
         console.log('Creating new session.')
-        const response = await createSession(currentUserData.getOrCreateUserId(), latitude, longitude, placeId);
+        const url = generateCrudUrl('/.netlify/functions/create_session', {
+            userId: currentUserData.getOrCreateUserId(),
+            latitude: latitude,
+            longitude: longitude,
+            placeId: placeId,
+        });
+        console.log(`Generated url: ${url}`);
+
+        const response = await fetch(url);
         console.log('Created new session')
 
         // Update current data with new session values
-        session = response['session']
+        const data = await response.json()
+        session = data['session']
         currentUserData.setSessionCode(session['code'])
 
         const newUrl = `${window.location.origin}${window.location.pathname}?code=${currentUserData.getSessionCode()}`;
@@ -151,14 +175,19 @@ async function processLocationInput(latitude, longitude, placeId) {
 
     } else {
         console.log(`Adding current user's new location input to session`)
-        const response = await addSessionLocation(
-            currentUserData.getSessionCode(),
-            currentUserData.getOrCreateUserId(),
-            latitude,
-            longitude,
-            placeId
-        );
-        session = response['session']
+        const url = generateCrudUrl('/.netlify/functions/add_session_location', {
+            code: currentUserData.getSessionCode(),
+            userId: currentUserData.getOrCreateUserId(),
+            latitude: latitude,
+            longitude: longitude,
+            placeId: placeId
+        });
+        console.log(`Generated url: ${url}`);
+        const response = await fetch(url)
+        const data = await response.json()
+        console.log(data)
+        console.log(data['session'])
+        session = data['session']
 
         await evaluateSession(session);
     }

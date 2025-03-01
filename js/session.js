@@ -1,8 +1,7 @@
-import { getQueryParam } from './utils.js';
-
 export class CurrentUserData {
     constructor() {
-        this.sessionCode = getQueryParam("code");
+        const params = new URLSearchParams(window.location.search);
+        this.sessionCode = params.get("code");
         this.userId = this.getOrCreateUserId();
     }
 
@@ -46,4 +45,13 @@ export function calculateMidpoint(session, numLocations) {
         latitude: totalLatitude / numLocations,
         longitude: totalLongitude / numLocations,
     };
+}
+
+export function generateCrudUrl(path, params = {}) {
+    const queryString = Object.entries(params)
+        .filter(([_, value]) => value !== null && value !== undefined) // Remove null/undefined values
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
+
+    return queryString ? `${path}/?${queryString}` : `${path}/`;
 }

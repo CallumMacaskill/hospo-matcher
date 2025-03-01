@@ -1,4 +1,4 @@
-import { deleteSessionLocation } from './api.js';
+import { generateCrudUrl } from './session.js';
 
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
@@ -152,12 +152,14 @@ export function populateAddressList(sessionCode, userId, locations, addresses) {
             setLoadingVisibility(true)
             const locationIndex = event.target.dataset.index;
 
-            await deleteSessionLocation(
-                sessionCode,
-                userId,
-                String(locations[locationIndex]["latitude"]),
-                String(locations[locationIndex]["longitude"])
-            );
+            const url = generateCrudUrl('/.netlify/functions/delete_session_location', {
+                code: sessionCode,
+                userId: userId,
+                latitude: String(locations[locationIndex]["latitude"]),
+                longitude: String(locations[locationIndex]["longitude"]),
+            });
+            const response = await fetch(url)
+            const data = await response.json()
             setLoadingVisibility(true)
             location.reload();
         });
