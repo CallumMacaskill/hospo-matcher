@@ -5,7 +5,7 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI);
 const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
-    // Define session data
+    // Define meetup data
     const { code } = event.queryStringParameters
     const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters

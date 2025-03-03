@@ -1,16 +1,16 @@
 export class CurrentUserData {
     constructor() {
         const params = new URLSearchParams(window.location.search);
-        this.sessionCode = params.get("code");
+        this.meetupCode = params.get("code");
         this.userId = this.getOrCreateUserId();
     }
 
-    getSessionCode() {
-        return this.sessionCode;
+    getMeetupCode() {
+        return this.meetupCode;
     }
 
-    setSessionCode(code) {
-        this.sessionCode = code;
+    setMeetupCode(code) {
+        this.meetupCode = code;
     }
 
     getOrCreateUserId() {
@@ -23,8 +23,8 @@ export class CurrentUserData {
     }
 }
 
-export function calculateMidpoint(session, numLocations) {
-    if (!session) {
+export function calculateMidpoint(meetup, numLocations) {
+    if (!meetup) {
         throw new Error("Invalid inputs for calculating midpoint.");
     }
 
@@ -32,7 +32,7 @@ export function calculateMidpoint(session, numLocations) {
     let totalLongitude = 0;
 
     // Iterate through the lists and accumulate latitude and longitude values
-    Object.values(session['user_coordinates']).forEach(list => {
+    Object.values(meetup['user_coordinates']).forEach(list => {
         list.forEach(coord => {
             if (coord.latitude && coord.longitude) {
                 totalLatitude += parseFloat(coord.latitude);

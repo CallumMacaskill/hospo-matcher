@@ -1,4 +1,4 @@
-import { generateCrudUrl } from './session.js';
+import { generateCrudUrl } from './meetup.js';
 
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
@@ -15,14 +15,14 @@ export const elements = {
     placesList: document.getElementById("places-list"),
 };
 
-export function evaluatePageSubheading(session, sessionCode, userId) {
+export function evaluatePageSubheading(meetup, meetupCode, userId) {
     // Generate contextualised page description
     var page_description = 'Start a new meetup by adding your location'
-    if (session && sessionCode) {
-        const code_substring = sessionCode.substring(0, 6);
+    if (meetup && meetupCode) {
+        const code_substring = meetupCode.substring(0, 6);
 
         // Check if user has already submitted location
-        const userLocations = session['user_coordinates'][userId];
+        const userLocations = meetup['user_coordinates'][userId];
         if (userLocations && userLocations.length > 0) {
             page_description = `You've joined meetup #${code_substring}`;
         } else {
@@ -123,7 +123,7 @@ export function initializeAutocomplete() {
 }
 
 
-export function populateAddressList(sessionCode, userId, locations, addresses) {
+export function populateAddressList(meetupCode, userId, locations, addresses) {
     // TODO: check that lists are the same length
 
     // Clear the existing list
@@ -152,8 +152,8 @@ export function populateAddressList(sessionCode, userId, locations, addresses) {
             setLoadingVisibility(true)
             const locationIndex = event.target.dataset.index;
 
-            const url = generateCrudUrl('/.netlify/functions/delete_session_location', {
-                code: sessionCode,
+            const url = generateCrudUrl('/.netlify/functions/delete_meetup_location', {
+                code: meetupCode,
                 userId: userId,
                 latitude: String(locations[locationIndex]["latitude"]),
                 longitude: String(locations[locationIndex]["longitude"]),
