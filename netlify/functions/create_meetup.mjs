@@ -39,7 +39,7 @@ export const handler = async (event) => {
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
-    const collection = database.collection(process.env.MONGODB_SESSIONS_COLLECTION);
+    const collection = database.collection(process.env.MONGODB_COLLECTION);
 
     // Submit create meetup request
     collection.insertOne(meetup)
