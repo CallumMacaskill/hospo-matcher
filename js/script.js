@@ -1,11 +1,11 @@
-import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
+import { elements, evaluatePageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
 import { loadGoogleMapsApi, reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
 import { CurrentUserData, calculateMidpoint, generateCrudUrl } from './session.js';
 
 const baseURL = window.location.origin + "/";
 console.log(baseURL)
 
-// Load Maps Platform API
+// Load Maps Platform API and initialise Places autocomplete widget
 let open_sesame;
 if (baseURL === 'http://localhost:8888/') {
     open_sesame = prompt();
@@ -16,16 +16,13 @@ if (baseURL === 'http://localhost:8888/') {
 }
 
 await loadGoogleMapsApi(open_sesame);
-
-// Initialise autocomplete widget
 const placeAutocomplete = initializeAutocomplete();
 
-// Add the gmp-placeselect listener, and display the results.
+// Get Place coordinates on selection, and display the results.
 placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
     await place.fetchFields({
         fields: ["location"],
     });
-    console.log(`Selected place: ${JSON.stringify(place.toJSON())}`)
 
     // Trigger input processing
     await processLocationInput(place.location.lat(), place.location.lng(), place.id)
@@ -59,13 +56,13 @@ if (session) {
         elements.shareLinkBtn.classList.remove('hidden');
 
         // Calculate midpoint, show results, show link button
-        await evaluateSession(session)
+        await evaluateSessionResult(session)
         elements.resultsSection.classList.add("show")
     }
 }
 
 // Generate a contextualised description based on data inputs
-refreshPageSubheading(
+evaluatePageSubheading(
     session,
     currentUserData.getSessionCode(),
     currentUserData.getOrCreateUserId()
@@ -73,9 +70,8 @@ refreshPageSubheading(
 
 // Show main content and hide loading spinner
 setLoadingVisibility(false)
-console.log('Showing main')
 
-async function evaluateSession(session) {
+async function evaluateSessionResult(session) {
     let midpointResult = "Only one location submitted. Add more or invite friends to find your midpoint."
 
     // Calculate the number of locations submitted
@@ -96,6 +92,7 @@ async function evaluateSession(session) {
         elements.shareMidpointBtn.innerHTML = address
         elements.shareMidpointBtn.classList.add('show')
 
+        // Search nearby Places
         console.log(`Fetching Nearby Places results.`)
         const placesData = await searchNearbyPlaces(midpoint, open_sesame);
         generatePlacesElements(placesData);
@@ -144,6 +141,7 @@ async function processLocationInput(latitude, longitude, placeId) {
     setLoadingVisibility(true)
 
     if (!currentUserData.getSessionCode()) {
+        // Create a new session
         console.log('Creating new session.')
         const url = generateCrudUrl('/.netlify/functions/create_session', {
             userId: currentUserData.getOrCreateUserId(),
@@ -156,24 +154,17 @@ async function processLocationInput(latitude, longitude, placeId) {
         const response = await fetch(url);
         console.log('Created new session')
 
-        // Update current data with new session values
+        // Update current data with new session
         const data = await response.json()
         session = data['session']
         currentUserData.setSessionCode(session['code'])
 
+        // Update browser URL
         const newUrl = `${window.location.origin}${window.location.pathname}?code=${currentUserData.getSessionCode()}`;
         history.replaceState(null, "", newUrl);
 
-        // Update page context after creating session
-        refreshPageSubheading(
-            session,
-            currentUserData.getSessionCode(),
-            currentUserData.getOrCreateUserId()
-        );
-
-        elements.midpointText.innerText = "Only one location submitted. Add more or invite friends to find your midpoint.";
-
     } else {
+        // Update existing session
         console.log(`Adding current user's new location input to session`)
         const url = generateCrudUrl('/.netlify/functions/add_session_location', {
             code: currentUserData.getSessionCode(),
@@ -182,15 +173,20 @@ async function processLocationInput(latitude, longitude, placeId) {
             longitude: longitude,
             placeId: placeId
         });
-        console.log(`Generated url: ${url}`);
         const response = await fetch(url)
         const data = await response.json()
-        console.log(data)
-        console.log(data['session'])
         session = data['session']
-
-        await evaluateSession(session);
     }
+
+    // Update page subheading
+    evaluatePageSubheading(
+        session,
+        currentUserData.getSessionCode(),
+        currentUserData.getOrCreateUserId()
+    );
+
+    // Evaluate session, getting results if possible.
+    await evaluateSessionResult(session);
 
     // Show user's previous location inputs
     await generateInputList(session["user_coordinates"][currentUserData.getOrCreateUserId()])

@@ -53,5 +53,7 @@ export function generateCrudUrl(path, params = {}) {
         .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
         .join("&");
 
-    return queryString ? `${path}/?${queryString}` : `${path}/`;
+    const url =  queryString ? `${path}/?${queryString}` : `${path}/`;
+    console.log(`Generated URL: ${url}`);
+    return url
 }

@@ -15,7 +15,7 @@ export const elements = {
     placesList: document.getElementById("places-list"),
 };
 
-export function refreshPageSubheading(session, sessionCode, userId) {
+export function evaluatePageSubheading(session, sessionCode, userId) {
     // Generate contextualised page description
     var page_description = 'Start a new meetup by adding your location'
     if (session && sessionCode) {
