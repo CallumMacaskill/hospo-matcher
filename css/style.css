@@ -186,6 +186,12 @@ h2 {
     font-weight: 600;
 }
 
+.page-heading-link {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Use the default text color */
+    cursor: pointer; /* Make it feel clickable */
+}
+
 /* Generic section styling */
 .section {
     width: 100%;
