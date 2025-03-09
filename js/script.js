@@ -197,7 +197,7 @@ function shareLink() {
 
         // Copy link to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            dom.invertShareLinkStyling()
+            dom.invertButtonStyling(dom.elements.shareLinkBtn, 'Share Meetup')
         }).catch(err => {
             console.error('Failed to copy text:', err);
         });
@@ -206,9 +206,8 @@ function shareLink() {
 
 function shareAddress() {
     // Copy link to clipboard
-    // TODO: Use state from sessionData instead of button
     navigator.clipboard.writeText(meetup.resultAddress).then(() => {
-        dom.invertShareAddressStyling()
+        dom.invertButtonStyling(dom.elements.shareMidpointBtn, meetup.resultAddress)
     }).catch(err => {
         console.error('Failed to copy text:', err);
     });

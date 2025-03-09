@@ -36,34 +36,17 @@ export class Dom {
         });
     }
 
-    invertShareLinkStyling() {
+    invertButtonStyling(element, text) {
         // Update button appearance and disable it
-        this.elements.shareLinkBtn.textContent = 'Copied!';
-        this.elements.shareLinkBtn.classList.add('inverted');
-        this.elements.shareLinkBtn.disabled = true;
+        element.textContent = 'Copied!';
+        element.classList.add('inverted');
+        element.disabled = true;
     
         // Revert button state after 2 seconds
         setTimeout(() => {
-            this.elements.shareLinkBtn.textContent = 'Share Meetup';
-            this.elements.shareLinkBtn.classList.remove('inverted');
-            this.elements.shareLinkBtn.disabled = false;
-        }, 1500);
-    }
-
-    invertShareAddressStyling() {
-        // Midpoint address
-        const address = this.elements.shareMidpointBtn.textContent;
-    
-        // Update button appearance and disable it
-        this.elements.shareMidpointBtn.textContent = 'Copied!';
-        this.elements.shareMidpointBtn.classList.add('inverted');
-        this.elements.shareMidpointBtn.disabled = true;
-    
-        // Revert button state after 2 seconds
-        setTimeout(() => {
-            this.elements.shareMidpointBtn.textContent = address;
-            this.elements.shareMidpointBtn.classList.remove('inverted');
-            this.elements.shareMidpointBtn.disabled = false;
+            element.textContent = text;
+            element.classList.remove('inverted');
+            element.disabled = false;
         }, 1500);
     }
 
