@@ -5,20 +5,16 @@ export class Meetup {
         this.setNewState(data)
     }
 
-    getData() {
-        return this.data;
-    }
-
     setNewState(data) {
         this.data = data;
         this.resultMessage = null;
         this.resultLocation = null;
         this.resultAddress = null;
         this.nearbyPlaces = null;
+        console.log('Set new state to meetup')
     }
 
     calculateMidpoint(numLocations) {
-        console.log('Calculating midpoint...')
         if (!this.data) {
             throw new Error("Invalid inputs for calculating midpoint.");
         }
@@ -40,9 +36,11 @@ export class Meetup {
             latitude: totalLatitude / numLocations,
             longitude: totalLongitude / numLocations,
         };
+        console.log(`Calculated midpoint ${this.resultLocation.latitude}, ${this.resultLocation.longitude}`)
     }
 
     async evaluateResult(open_sesame) {
+        console.log('Evaluating result')
         let resultMessage = "Only one location submitted. Add more or invite friends to find your midpoint."
     
         // Calculate the number of locations submitted
@@ -66,7 +64,6 @@ export class Meetup {
     }
 
     evaluatePageSubheading(code, userId) {
-        console.log('Evaluating page subheading...')
         // Generate contextualised page description
         var page_description = 'Start a new meetup by adding your location'
         if (code) {
@@ -80,6 +77,7 @@ export class Meetup {
                 page_description = `You're joining meetup #${code_substring}`;
             }
         }
+        console.log(`Evaluated page description: ${page_description}`)
         return page_description;
     }
 }
