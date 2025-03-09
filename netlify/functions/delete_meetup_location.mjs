@@ -6,6 +6,8 @@ const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
     // Define meetup data
+    console.log('Query parameters:');
+    console.log(event.queryStringParameters);
     const { code } = event.queryStringParameters
     const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters
@@ -37,8 +39,9 @@ export const handler = async (event) => {
     if (placeId) {
         update.$pull[`user_coordinates.${userId}`]["place_id"] = placeId;
     }
-
+    console.log('Filter:')
     console.log(filter)
+    console.log('Update:')
     console.log(update)
 
     // Execute the update operation

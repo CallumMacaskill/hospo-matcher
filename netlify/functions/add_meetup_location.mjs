@@ -6,6 +6,8 @@ const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
   // Define meetup data
+  console.log('Query parameters:');
+  console.log(event.queryStringParameters);
   const { code } = event.queryStringParameters
   const { userId } = event.queryStringParameters
   var { latitude } = event.queryStringParameters
@@ -26,7 +28,8 @@ export const handler = async (event) => {
   if (placeId) {
     update_body[`user_coordinates.${userId}`]['place_id'] = placeId;
   }
-  console.log(`update body: ${update_body}`);
+  console.log('Update body');
+  console.log(update_body);
 
   // Connect to MongoDB
   const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
