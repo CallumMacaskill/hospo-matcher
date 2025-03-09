@@ -10,14 +10,9 @@ console.log(baseURL)
 var dom = new Dom();
 
 // Load Maps Platform API and initialise Places autocomplete widget
-let open_sesame;
-if (baseURL === 'http://localhost:8888/') {
-    open_sesame = prompt();
-} else {
-    const response = await fetch(`/.netlify/functions/read_maps_platform_value`);
-    const data = response.json()
-    open_sesame = data['open_sesame']
-}
+const response = await fetch(`/.netlify/functions/read_maps_platform_value`);
+const data = await response.json()
+const open_sesame = data['open_sesame']
 
 await loadGoogleMapsApi(open_sesame);
 const placeAutocomplete = dom.initializeAutocomplete();
