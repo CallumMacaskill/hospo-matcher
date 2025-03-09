@@ -1,4 +1,4 @@
-import { generateCrudUrl } from './meetup.js';
+import { generateCrudUrl } from './utils.js';
 
 export const elements = {
     loadingSpinner: document.getElementById('loading-spinner'),
@@ -14,23 +14,6 @@ export const elements = {
     placesText: document.getElementById('places-text'),
     placesList: document.getElementById("places-list"),
 };
-
-export function evaluatePageSubheading(meetup, meetupCode, userId) {
-    // Generate contextualised page description
-    var page_description = 'Start a new meetup by adding your location'
-    if (meetup && meetupCode) {
-        const code_substring = meetupCode.substring(0, 6);
-
-        // Check if user has already submitted location
-        const userLocations = meetup['user_coordinates'][userId];
-        if (userLocations && userLocations.length > 0) {
-            page_description = `You've joined meetup #${code_substring}`;
-        } else {
-            page_description = `You're joining meetup #${code_substring}`;
-        }
-    }
-    elements.pageDescription.textContent = page_description;
-}
 
 
 export function generatePlacesElements(data) {
@@ -171,4 +154,21 @@ export function populateAddressList(meetupCode, userId, locations, addresses) {
         // Add list item to the address list container
         addressList.appendChild(listItem);
     }
+}
+
+export function updateMeetupResultElements(meetup) {
+    if (meetup.resultMessage) {
+        elements.midpointText.innerText = meetup.resultMessage;
+    }
+
+    if (meetup.resultAddress) {
+        elements.shareMidpointBtn.innerHTML = meetup.resultAddress;
+        elements.shareMidpointBtn.classList.add('show');
+    }
+
+    if (meetup.nearbyPlaces) {
+        generatePlacesElements(meetup.nearbyPlaces);
+        elements.placesText.classList.add('show')
+    }
+    elements.resultsSection.classList.add("show")
 }
