@@ -6,7 +6,7 @@ const mongoClient = new MongoClient(process.env.MONGODB_URI);
 const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
-    // Define session data
+    // Define meetup data
     let uuid = crypto.randomUUID();
     const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters
@@ -29,7 +29,7 @@ export const handler = async (event) => {
         location['place_id'] = placeId
     }
 
-    session = {
+    meetup = {
         "code": uuid,
         "created_at": datetime,
         "user_coordinates": {
@@ -39,16 +39,16 @@ export const handler = async (event) => {
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
-    const collection = database.collection(process.env.MONGODB_SESSIONS_COLLECTION);
+    const collection = database.collection(process.env.MONGODB_COLLECTION);
 
-    // Submit create session request
-    collection.insertOne(session)
+    // Submit create meetup request
+    collection.insertOne(meetup)
     console.log("Inserted document")
 
     return {
         statusCode: 200,
         body: JSON.stringify({
-            session: session
+            meetup: meetup
         })
     }
 }

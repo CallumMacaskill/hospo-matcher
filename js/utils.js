@@ -1,14 +1,10 @@
-// Function to get query parameter value
-export function getQueryParam(param) {
-    const params = new URLSearchParams(window.location.search);
-    return params.get(param);
-}
+export function generateCrudUrl(path, params = {}) {
+    const queryString = Object.entries(params)
+        .filter(([_, value]) => value !== null && value !== undefined) // Remove null/undefined values
+        .map(([key, value]) => `${encodeURIComponent(key)}=${encodeURIComponent(value)}`)
+        .join("&");
 
-// Fetch helper with error handling
-export async function fetchData(url, options = {}) {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    return response.json();
+    const url =  queryString ? `${path}/?${queryString}` : `${path}/`;
+    console.log(`Generated URL: ${url}`);
+    return url
 }

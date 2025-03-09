@@ -1,107 +1,81 @@
-import { elements, refreshPageSubheading, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList } from './dom.js';
-import { getSession, createSession, addSessionLocation, getMapsPlatformValue, loadGoogleMapsApi } from './api.js';
-import { reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
-import { getLocation } from './geolocation.js';
-import { CurrentUserData, calculateMidpoint } from './session.js';
-import { fetchData } from './utils.js';
+import { Dom } from './dom.js';
+import { Meetup } from './meetup.js';
+import { SessionData } from './session.js';
+import { loadGoogleMapsApi, reverseGeocodeLocation } from './maps_platform.js';
+import { generateCrudUrl } from './utils.js';
 
 const baseURL = window.location.origin + "/";
-console.log(baseURL);
+console.log(baseURL)
 
-// Load Maps Platform API
-let open_sesame;
+var dom = new Dom();
 
-if (baseURL === 'http://localhost:8888/') {
-    open_sesame = prompt();
-} else {
-    const response = await getMapsPlatformValue();
-    open_sesame = response['open_sesame']
-}
+// Load Maps Platform API and initialise Places autocomplete widget
+const response = await fetch(`/.netlify/functions/read_maps_platform_value`);
+const data = await response.json()
+const open_sesame = data['open_sesame']
 
 await loadGoogleMapsApi(open_sesame);
+const placeAutocomplete = dom.initializeAutocomplete();
 
-// Initialise autocomplete widget
-const placeAutocomplete = initializeAutocomplete();
-
-// Add the gmp-placeselect listener, and display the results.
+// Get Place coordinates on selection, and display the results.
 placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
     await place.fetchFields({
         fields: ["location"],
     });
-    console.log(`Selected place: ${JSON.stringify(place.toJSON())}`)
 
     // Trigger input processing
     await processLocationInput(place.location.lat(), place.location.lng(), place.id)
 });
 
 // Load current user's browser data
-var currentUserData = new CurrentUserData()
-console.log(`Using session code: ${currentUserData.getSessionCode()}`)
+var sessionData = new SessionData()
+console.log(`Using meetup code: ${sessionData.getMeetupCode()}`);
+var meetup = new Meetup();
 
-// Get session data if available
-if (currentUserData.getSessionCode()) {
-    console.log(`Reading session from database.`)
-    var session = await getSession(currentUserData.getSessionCode())
-    console.log(`Read session from database.`)
+// Get meetup data if available
+if (sessionData.getMeetupCode()) {
+    console.log(`Reading meetup from database.`)
+    const url = generateCrudUrl('/.netlify/functions/read_meetup', {
+        code: sessionData.getMeetupCode()
+    });
+    console.log(`Generated url: ${url}`)
+    const response = await fetch(url)
+    var meetupDocument = await response.json()
+    console.log(`Read meetup from database.`)
+
+    meetup.setNewState(meetupDocument);
+    console.log('Created meetup obj')
 }
+console.log(meetup)
 
-// Check if user has already submitted location
-if (session) {
-    const userId = currentUserData.getOrCreateUserId();
-    const userLocations = session['user_coordinates'][userId];
-
+// Check if user has already submitted location.
+if (meetup.getData()) {
+    const userId = sessionData.getOrCreateUserId();
+    const userLocations = meetup.getData()['user_coordinates'][userId];
     if (userLocations && userLocations.length > 0) {
         console.log(`User locations length: ${userLocations.length}`)
 
         await generateInputList(userLocations)
 
-        elements.shareLinkBtn.classList.remove('hidden');
+        dom.elements.shareLinkBtn.classList.remove('hidden');
 
         // Calculate midpoint, show results, show link button
-        await evaluateSession(session)
-        elements.resultsSection.classList.add("show")
+        await meetup.evaluateResult(open_sesame);
+
+        dom.updateMeetupResultElements(meetup)
     }
 }
 
 // Generate a contextualised description based on data inputs
-refreshPageSubheading(
-    session,
-    currentUserData.getSessionCode(),
-    currentUserData.getOrCreateUserId()
+const subheading = meetup.evaluatePageSubheading(
+    sessionData.getMeetupCode(),
+    sessionData.getOrCreateUserId()
 );
+console.log(subheading);
+dom.elements.pageDescription.textContent = subheading;
 
 // Show main content and hide loading spinner
-setLoadingVisibility(false)
-console.log('Showing main')
-
-async function evaluateSession(session) {
-    let midpointResult = "Only one location submitted. Add more or invite friends to find your midpoint."
-
-    // Calculate the number of locations submitted
-    const numLocations = Object.values(session.user_coordinates).reduce((sum, list) => sum + list.length, 0);
-    console.log(numLocations)
-
-    if (numLocations > 1) {
-        // Calculate midpoint coordinates
-        console.log('Calculating midpoint of all session users.')
-        const midpoint = calculateMidpoint(session, numLocations);
-        console.log(`Calculated midpoint: ${midpoint.latitude}, ${midpoint.longitude}`)
-
-        // Update midpoint element text
-        midpointResult = `Your midpoint between ${numLocations} locations`;
-
-        // Populate button with address from coordinates
-        const address = await reverseGeocodeLocation(midpoint);
-        elements.shareMidpointBtn.innerHTML = address
-        elements.shareMidpointBtn.classList.add('show')
-
-        console.log(`Fetching Nearby Places results.`)
-        const placesData = await searchNearbyPlaces(midpoint, open_sesame);
-        generatePlacesElements(placesData);
-        elements.placesText.classList.add('show')
-    }
-    elements.midpointText.innerText = midpointResult;
-}
+dom.setLoadingVisibility(false)
 
 async function generateInputList(userLocations) {
     // Map each userId to a promise that eventually fulfills with the address
@@ -114,11 +88,25 @@ async function generateInputList(userLocations) {
     const addresses = await Promise.all(promises);
 
     // Show user's previous location inputs
-    populateAddressList(currentUserData.getSessionCode(), currentUserData.getOrCreateUserId(), userLocations, addresses)
+    dom.populateAddressList(sessionData.getMeetupCode(), sessionData.getOrCreateUserId(), userLocations, addresses)
 }
 
 async function getCurrentLocationHandler() {
-    const { latitude, longitude } = await getLocation();
+    const { latitude, longitude } = await new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => reject(error)
+            );
+        } else {
+            reject(new Error("Geolocation not supported"));
+        }
+    });
     processLocationInput(latitude, longitude);
 }
 
@@ -126,45 +114,62 @@ async function processLocationInput(latitude, longitude, placeId) {
     const MIN_LOADING_TIME = 300; // in milliseconds
     const timeStart = performance.now()
 
-    setLoadingVisibility(true)
+    dom.setLoadingVisibility(true)
 
-    if (!currentUserData.getSessionCode()) {
-        console.log('Creating new session.')
-        const response = await createSession(currentUserData.getOrCreateUserId(), latitude, longitude, placeId);
-        console.log('Created new session')
+    if (!sessionData.getMeetupCode()) {
+        // Create a new meetup
+        console.log('Creating new meetup.')
+        const url = generateCrudUrl('/.netlify/functions/create_meetup', {
+            userId: sessionData.getOrCreateUserId(),
+            latitude: latitude,
+            longitude: longitude,
+            placeId: placeId,
+        });
+        console.log(`Generated url: ${url}`);
 
-        // Update current data with new session values
-        session = response['session']
-        currentUserData.setSessionCode(session['code'])
+        const response = await fetch(url);
+        console.log('Created new meetup')
 
-        const newUrl = `${window.location.origin}${window.location.pathname}?code=${currentUserData.getSessionCode()}`;
+        // Update current data with new meetup
+        const data = await response.json()
+        meetupDocument = data['meetup']
+        sessionData.setMeetupCode(meetupDocument['code'])
+        meetup.setNewState(meetupDocument);
+
+        // Update browser URL
+        const newUrl = `${window.location.origin}${window.location.pathname}?code=${sessionData.getMeetupCode()}`;
         history.replaceState(null, "", newUrl);
 
-        // Update page context after creating session
-        refreshPageSubheading(
-            session,
-            currentUserData.getSessionCode(),
-            currentUserData.getOrCreateUserId()
-        );
-
-        elements.midpointText.innerText = "Only one location submitted. Add more or invite friends to find your midpoint.";
-
     } else {
-        console.log(`Adding current user's new location input to session`)
-        const response = await addSessionLocation(
-            currentUserData.getSessionCode(),
-            currentUserData.getOrCreateUserId(),
-            latitude,
-            longitude,
-            placeId
-        );
-        session = response['session']
-
-        await evaluateSession(session);
+        // Update existing meetup
+        console.log(`Adding current user's new location input to meetup`)
+        const url = generateCrudUrl('/.netlify/functions/add_meetup_location', {
+            code: sessionData.getMeetupCode(),
+            userId: sessionData.getOrCreateUserId(),
+            latitude: latitude,
+            longitude: longitude,
+            placeId: placeId
+        });
+        const response = await fetch(url);
+        const data = await response.json();
+        meetupDocument = data['meetup'];
+        meetup.setNewState(meetupDocument);
     }
 
+    // Update page subheading with new context
+    const subheading = meetup.evaluatePageSubheading(
+        sessionData.getMeetupCode(),
+        sessionData.getOrCreateUserId()
+    );
+    dom.elements.pageDescription.textContent = subheading;
+
+    // Evaluate meetup, getting results if possible.
+    await meetup.evaluateResult(open_sesame);
+
     // Show user's previous location inputs
-    await generateInputList(session["user_coordinates"][currentUserData.getOrCreateUserId()])
+    await generateInputList(meetup.data.user_coordinates[sessionData.getOrCreateUserId()])
+
+    dom.updateMeetupResultElements(meetup)
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
@@ -175,19 +180,19 @@ async function processLocationInput(latitude, longitude, placeId) {
     }
 
     // Upon success, prompt user to share with friends
-    elements.shareLinkBtn.classList.remove('hidden');
-    elements.resultsSection.classList.add('show');
-    setLoadingVisibility(false)
+    dom.elements.shareLinkBtn.classList.remove('hidden');
+    dom.elements.resultsSection.classList.add('show');
+    dom.setLoadingVisibility(false)
 }
 
 function shareLink() {
-    // Require active session code to share link
-    if (currentUserData.getSessionCode()) {
-        const url = `${baseURL}?code=${currentUserData.getSessionCode()}`;
+    // Require active meetup code to share link
+    if (sessionData.getMeetupCode()) {
+        const url = `${baseURL}?code=${sessionData.getMeetupCode()}`;
 
         // Copy link to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            invertShareLinkStyling()
+            dom.invertButtonStyling(dom.elements.shareLinkBtn, 'Share Meetup')
         }).catch(err => {
             console.error('Failed to copy text:', err);
         });
@@ -196,14 +201,14 @@ function shareLink() {
 
 function shareAddress() {
     // Copy link to clipboard
-    navigator.clipboard.writeText(elements.shareMidpointBtn.textContent).then(() => {
-        invertShareAddressStyling()
+    navigator.clipboard.writeText(meetup.resultAddress).then(() => {
+        dom.invertButtonStyling(dom.elements.shareMidpointBtn, meetup.resultAddress)
     }).catch(err => {
         console.error('Failed to copy text:', err);
     });
 }
 
 // Add event listeners to HTML elements
-elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
-elements.shareLinkBtn.addEventListener("click", shareLink);
-elements.shareMidpointBtn.addEventListener("click", shareAddress);
+dom.elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
+dom.elements.shareLinkBtn.addEventListener("click", shareLink);
+dom.elements.shareMidpointBtn.addEventListener("click", shareAddress);
