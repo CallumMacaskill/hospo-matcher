@@ -6,6 +6,8 @@ const clientPromise = mongoClient.connect();
 
 export const handler = async (event) => {
   // Define meetup data
+  console.log('Query parameters:');
+  console.log(event.queryStringParameters);
   const { code } = event.queryStringParameters
 
   // Connect to MongoDB
@@ -13,9 +15,9 @@ export const handler = async (event) => {
   const collection = database.collection(process.env.MONGODB_COLLECTION);
 
   // Read meetup document
-  meetupDoc = await collection.findOne({ "code": code })
-  console.log("Found document")
-  console.log(meetupDoc)
+  meetupDoc = await collection.findOne({ "code": code });
+  console.log("Retrieved result:");
+  console.log(meetupDoc);
 
   return {
     statusCode: 200,

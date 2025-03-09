@@ -23,10 +23,12 @@ export async function reverseGeocodeLocation(location) {
     }
 
     try {
-        // Await the geocoder response
+        console.log(`Performing reverse geocode for location ${location.latitude}, ${location.longitude}`)
         const response = await geocoder.geocode(geocodeArgs);
         if (response.results[0]) {
-            return response.results[0].formatted_address; // Return the address
+            const address = response.results[0].formatted_address
+            console.log(`Received address ${address}`)
+            return address;
         } else {
             console.warn("No reverse geocode results found");
             return null;
@@ -38,7 +40,7 @@ export async function reverseGeocodeLocation(location) {
 }
 
 export async function searchNearbyPlaces(location, open_sesame) {
-    console.log(`Searching places near: ${location.latitude}, ${location.longitude}`);
+    console.log(`Searching places near ${location.latitude}, ${location.longitude}`);
 
     const apiUrl = "https://places.googleapis.com/v1/places:searchNearby";
     const requestBody = {
@@ -70,8 +72,10 @@ export async function searchNearbyPlaces(location, open_sesame) {
             console.error(`API Error: ${response.status} - ${errorText}`);
             return { error: `API request failed with status ${response.status}`, details: errorText };
         }
-
-        return await response.json();
+        const data = await response.json();
+        const places = data.places;
+        console.log(`Received ${places.length} places`);
+        return places;
     } catch (error) {
         console.error("Unexpected error:", error);
         return { error_details: error.message };

@@ -8,6 +8,8 @@ const clientPromise = mongoClient.connect();
 export const handler = async (event) => {
     // Define meetup data
     let uuid = crypto.randomUUID();
+    console.log('Query parameters:');
+    console.log(event.queryStringParameters);
     const { userId } = event.queryStringParameters
     var { latitude } = event.queryStringParameters
     var { longitude } = event.queryStringParameters
@@ -36,6 +38,8 @@ export const handler = async (event) => {
             [userId]: [location]
         }
     }
+    console.log('Create body:')
+    console.log(meetup)
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);

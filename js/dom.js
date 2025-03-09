@@ -18,9 +18,10 @@ export class Dom {
         }
     }
 
-    generatePlacesElements(data) {
+    generatePlacesElements(places) {
+        console.log(`Creating page elements for ${places.length} places`)
         this.elements.placesList.innerHTML = ''; // Clear the current list
-        data.places.forEach(place => {
+        places.forEach(place => {
             const placeDiv = document.createElement('div');
             placeDiv.classList.add('place');
     
@@ -37,6 +38,7 @@ export class Dom {
     }
 
     invertButtonStyling(element, text) {
+        console.log(`Toggling styling for element ${element.id}`)
         // Update button appearance and disable it
         element.textContent = 'Copied!';
         element.classList.add('inverted');
@@ -59,7 +61,7 @@ export class Dom {
     }
 
     async setLoadingVisibility(show) {
-        console.log(`Changing vis to ${show}`)
+        console.log(`Setting loading visibility to ${show}`)
         if (show) {
             this.setVisibility(this.elements.mainContainer, false)
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -77,19 +79,18 @@ export class Dom {
     
         placeAutocomplete.addEventListener("focus", function (e) {
             setTimeout(() => {
-                console.log('focused...');
-                // Scroll to the top of the page
+                // Scroll to the top of the page - workaround for buggy pac positioning on mobile
                 window.scrollTo(0, 1);
             }, 50); // Delay to accommodate viewport resizing
         });
     
         // Insert the autocomplete element after the "Get Current Location" button
         this.elements.inputsWrapper.insertBefore(placeAutocomplete, this.elements.getLocationBtn.nextSibling);
-    
         return placeAutocomplete; // Return for further manipulation if needed
     }
 
-    populateAddressList(meetupCode, userId, locations, addresses) {    
+    populateAddressList(meetupCode, userId, locations, addresses) {
+        console.log(`Creating page elements for ${addresses.length} addresses`)
         // Clear the existing list
         const addressList = document.getElementById("address-list");
         addressList.innerHTML = "";
@@ -138,6 +139,7 @@ export class Dom {
     }
     
     updateMeetupResultElements(meetup) {
+        console.log('Assigning meetup results to page elements')
         if (meetup.resultMessage) {
             this.elements.midpointText.innerText = meetup.resultMessage;
         }

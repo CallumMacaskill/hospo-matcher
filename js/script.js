@@ -5,7 +5,6 @@ import { loadGoogleMapsApi, reverseGeocodeLocation } from './maps_platform.js';
 import { generateCrudUrl } from './utils.js';
 
 const baseURL = window.location.origin + "/";
-console.log(baseURL)
 
 var dom = new Dom();
 
@@ -29,39 +28,30 @@ placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
 
 // Load current user's browser data
 var sessionData = new SessionData()
-console.log(`Using meetup code: ${sessionData.getMeetupCode()}`);
 var meetup = new Meetup();
 
 // Get meetup data if available
 if (sessionData.getMeetupCode()) {
-    console.log(`Reading meetup from database.`)
+    console.log(`Using meetup code: ${sessionData.getMeetupCode()}`);
+    console.log(`Reading meetup from database`)
     const url = generateCrudUrl('/.netlify/functions/read_meetup', {
         code: sessionData.getMeetupCode()
     });
-    console.log(`Generated url: ${url}`)
     const response = await fetch(url)
     var meetupDocument = await response.json()
-    console.log(`Read meetup from database.`)
-
+    console.log(`Got meetup from database`)
     meetup.setNewState(meetupDocument);
-    console.log('Created meetup obj')
 }
-console.log(meetup)
 
 // Check if user has already submitted location.
-if (meetup.getData()) {
+if (meetup.data) {
     const userId = sessionData.getOrCreateUserId();
-    const userLocations = meetup.getData()['user_coordinates'][userId];
+    const userLocations = meetup.data['user_coordinates'][userId];
     if (userLocations && userLocations.length > 0) {
-        console.log(`User locations length: ${userLocations.length}`)
-
+        // Generate existing location input elements, calculate midpoint, show results, show link button
         await generateInputList(userLocations)
-
-        dom.elements.shareLinkBtn.classList.remove('hidden');
-
-        // Calculate midpoint, show results, show link button
         await meetup.evaluateResult(open_sesame);
-
+        dom.elements.shareLinkBtn.classList.remove('hidden');
         dom.updateMeetupResultElements(meetup)
     }
 }
@@ -71,13 +61,13 @@ const subheading = meetup.evaluatePageSubheading(
     sessionData.getMeetupCode(),
     sessionData.getOrCreateUserId()
 );
-console.log(subheading);
 dom.elements.pageDescription.textContent = subheading;
 
 // Show main content and hide loading spinner
 dom.setLoadingVisibility(false)
 
 async function generateInputList(userLocations) {
+    console.log(`Getting addresses of user's ${userLocations.length} existing locations`)
     // Map each userId to a promise that eventually fulfills with the address
     const promises = userLocations.map(async (location) => {
         const address = await reverseGeocodeLocation(location);
@@ -111,6 +101,7 @@ async function getCurrentLocationHandler() {
 }
 
 async function processLocationInput(latitude, longitude, placeId) {
+    console.log(`Processing location input: ${latitude}, ${longitude}, ${placeId}`)
     const MIN_LOADING_TIME = 300; // in milliseconds
     const timeStart = performance.now()
 
@@ -118,31 +109,32 @@ async function processLocationInput(latitude, longitude, placeId) {
 
     if (!sessionData.getMeetupCode()) {
         // Create a new meetup
-        console.log('Creating new meetup.')
+        console.log('Creating new meetup')
         const url = generateCrudUrl('/.netlify/functions/create_meetup', {
             userId: sessionData.getOrCreateUserId(),
             latitude: latitude,
             longitude: longitude,
             placeId: placeId,
         });
-        console.log(`Generated url: ${url}`);
 
         const response = await fetch(url);
-        console.log('Created new meetup')
+        const data = await response.json()
 
         // Update current data with new meetup
-        const data = await response.json()
         meetupDocument = data['meetup']
+        console.log(`Created new meetup #${meetupDocument['code']} in database`)
+
         sessionData.setMeetupCode(meetupDocument['code'])
         meetup.setNewState(meetupDocument);
 
         // Update browser URL
         const newUrl = `${window.location.origin}${window.location.pathname}?code=${sessionData.getMeetupCode()}`;
         history.replaceState(null, "", newUrl);
+        console.log('Updated browser URL')
 
     } else {
         // Update existing meetup
-        console.log(`Adding current user's new location input to meetup`)
+        console.log(`Adding location to existing meetup`)
         const url = generateCrudUrl('/.netlify/functions/add_meetup_location', {
             code: sessionData.getMeetupCode(),
             userId: sessionData.getOrCreateUserId(),
@@ -152,6 +144,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         });
         const response = await fetch(url);
         const data = await response.json();
+        console.log('Updated meetup in database')
         meetupDocument = data['meetup'];
         meetup.setNewState(meetupDocument);
     }
