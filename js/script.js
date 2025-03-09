@@ -1,11 +1,13 @@
-import { elements, generatePlacesElements, invertShareLinkStyling, invertShareAddressStyling, setVisibility, setLoadingVisibility, initializeAutocomplete, populateAddressList, updateMeetupResultElements } from './dom.js';
-import { loadGoogleMapsApi, reverseGeocodeLocation } from './maps_platform.js';
+import { Dom } from './dom.js';
 import { Meetup } from './meetup.js';
 import { SessionData } from './session.js';
+import { loadGoogleMapsApi, reverseGeocodeLocation } from './maps_platform.js';
 import { generateCrudUrl } from './utils.js';
 
 const baseURL = window.location.origin + "/";
 console.log(baseURL)
+
+var dom = new Dom();
 
 // Load Maps Platform API and initialise Places autocomplete widget
 let open_sesame;
@@ -18,7 +20,7 @@ if (baseURL === 'http://localhost:8888/') {
 }
 
 await loadGoogleMapsApi(open_sesame);
-const placeAutocomplete = initializeAutocomplete();
+const placeAutocomplete = dom.initializeAutocomplete();
 
 // Get Place coordinates on selection, and display the results.
 placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
@@ -60,12 +62,12 @@ if (meetup.getData()) {
 
         await generateInputList(userLocations)
 
-        elements.shareLinkBtn.classList.remove('hidden');
+        dom.elements.shareLinkBtn.classList.remove('hidden');
 
         // Calculate midpoint, show results, show link button
         await meetup.evaluateResult(open_sesame);
 
-        updateMeetupResultElements(meetup)
+        dom.updateMeetupResultElements(meetup)
     }
 }
 
@@ -75,10 +77,10 @@ const subheading = meetup.evaluatePageSubheading(
     sessionData.getOrCreateUserId()
 );
 console.log(subheading);
-elements.pageDescription.textContent = subheading;
+dom.elements.pageDescription.textContent = subheading;
 
 // Show main content and hide loading spinner
-setLoadingVisibility(false)
+dom.setLoadingVisibility(false)
 
 async function generateInputList(userLocations) {
     // Map each userId to a promise that eventually fulfills with the address
@@ -91,7 +93,7 @@ async function generateInputList(userLocations) {
     const addresses = await Promise.all(promises);
 
     // Show user's previous location inputs
-    populateAddressList(sessionData.getMeetupCode(), sessionData.getOrCreateUserId(), userLocations, addresses)
+    dom.populateAddressList(sessionData.getMeetupCode(), sessionData.getOrCreateUserId(), userLocations, addresses)
 }
 
 async function getCurrentLocationHandler() {
@@ -117,7 +119,7 @@ async function processLocationInput(latitude, longitude, placeId) {
     const MIN_LOADING_TIME = 300; // in milliseconds
     const timeStart = performance.now()
 
-    setLoadingVisibility(true)
+    dom.setLoadingVisibility(true)
 
     if (!sessionData.getMeetupCode()) {
         // Create a new meetup
@@ -164,7 +166,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         sessionData.getMeetupCode(),
         sessionData.getOrCreateUserId()
     );
-    elements.pageDescription.textContent = subheading;
+    dom.elements.pageDescription.textContent = subheading;
 
     // Evaluate meetup, getting results if possible.
     await meetup.evaluateResult(open_sesame);
@@ -172,7 +174,7 @@ async function processLocationInput(latitude, longitude, placeId) {
     // Show user's previous location inputs
     await generateInputList(meetup.data.user_coordinates[sessionData.getOrCreateUserId()])
 
-    updateMeetupResultElements(meetup)
+    dom.updateMeetupResultElements(meetup)
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
@@ -183,9 +185,9 @@ async function processLocationInput(latitude, longitude, placeId) {
     }
 
     // Upon success, prompt user to share with friends
-    elements.shareLinkBtn.classList.remove('hidden');
-    elements.resultsSection.classList.add('show');
-    setLoadingVisibility(false)
+    dom.elements.shareLinkBtn.classList.remove('hidden');
+    dom.elements.resultsSection.classList.add('show');
+    dom.setLoadingVisibility(false)
 }
 
 function shareLink() {
@@ -195,7 +197,7 @@ function shareLink() {
 
         // Copy link to clipboard
         navigator.clipboard.writeText(url).then(() => {
-            invertShareLinkStyling()
+            dom.invertShareLinkStyling()
         }).catch(err => {
             console.error('Failed to copy text:', err);
         });
@@ -206,13 +208,13 @@ function shareAddress() {
     // Copy link to clipboard
     // TODO: Use state from sessionData instead of button
     navigator.clipboard.writeText(meetup.resultAddress).then(() => {
-        invertShareAddressStyling()
+        dom.invertShareAddressStyling()
     }).catch(err => {
         console.error('Failed to copy text:', err);
     });
 }
 
 // Add event listeners to HTML elements
-elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
-elements.shareLinkBtn.addEventListener("click", shareLink);
-elements.shareMidpointBtn.addEventListener("click", shareAddress);
+dom.elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
+dom.elements.shareLinkBtn.addEventListener("click", shareLink);
+dom.elements.shareMidpointBtn.addEventListener("click", shareAddress);
