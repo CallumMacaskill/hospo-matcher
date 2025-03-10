@@ -173,17 +173,27 @@ body {
     /* Keep inline elements centered */
 }
 
-html,body{
-    -webkit-overflow-scrolling : touch !important;
-    overflow: auto !important;
-}
-
 h1 {
     font-weight: 700;
+
 }
 
 h2 {
     font-weight: 600;
+}
+
+h3 {
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.container h3 {
+    /*color: #1576F1;*/
+    margin-bottom: 4px;
+}
+
+p {
+    font-size: 14px
 }
 
 .page-heading-link {
@@ -196,7 +206,17 @@ h2 {
 .section {
     width: 100%;
     display: block;
+    flex-grow: 0;
+    background: white;
     /* Prevent flex behavior */
+}
+
+.section.alternate {
+    background: #F3F3F3;
+}
+
+.section.results {
+    flex-grow: 1;
 }
 
 /* Wrapper to keep content centered */
@@ -208,21 +228,9 @@ h2 {
     margin: 0 auto;
 }
 
-#main-container {
+#main-content {
     display: flex;
     flex-direction: column;
-    flex-grow: 1;
-}
-
-/* Modifier for inputs section */
-.inputs-section {
-    background: white;
-    flex-grow: 0;
-}
-
-/* Modifier for results section */
-.results-section {
-    background: #F3F3F3;
     flex-grow: 1;
 }
 
@@ -245,7 +253,7 @@ h2 {
     /* Hidden by default */
     pointer-events: none;
     /* Allow clicks to pass through */
-    padding-top: 112px;
+    padding-top: 150px;
     /* Adjust this value to control vertical positioning */
 }
 
@@ -279,27 +287,33 @@ h2 {
 
 
 /* Page Heading */
-.page-heading {
+h1 {
     font-family: 'PT Sans Narrow', sans-serif;
     font-size: 36px;
     color: black;
     text-align: center;
+    margin-bottom: 8px;
 }
 
-/* Page Description */
-.page-description {
-    font-size: 16px;
-    font-weight: 700;
+#page-subheading {
+    font-style: italic;
+}
+
+.container {
+    margin-bottom: 32px;
+}
+
+#meetup-context {
+    background: #F3F3F3;
+    border-radius: 12px;
+    padding: 15px;
+}
+
+#meetup-context h3 {
+    font-size: 18px;
     color: #1576F1;
-    text-align: center;
-    /* Center-align text */
-    margin-bottom: 20px;
-    /* Add space below the description */
 }
 
-#share-link-btn {
-    margin-top: 40px;
-}
 
 .midpoint-text {
     font-size: 16px;
@@ -322,7 +336,6 @@ h2 {
     overflow: hidden;
     text-overflow: ellipsis;
     border-radius: 100vmax;
-    ;
     cursor: pointer;
     margin-bottom: 10px;
     transition: all 0.25s ease;
@@ -350,6 +363,10 @@ h2 {
 
 .btn.primary.popup {
     transition: all 0.25s ease;
+}
+
+#get-location-btn {
+    margin-top: 8px;
 }
 
 /* Places List */
@@ -384,10 +401,6 @@ h2 {
     text-overflow: ellipsis;
 }
 
-#address-list-container {
-    margin-bottom: 10px;
-}
-
 #address-list {
     list-style-type: none;
     padding: 0;
@@ -401,7 +414,6 @@ h2 {
     padding-left: 20px;
     padding-right: 20px;
     border-radius: 100vmax;
-    ;
     margin-bottom: 5px;
     background-color: #F3F3F3;
 }

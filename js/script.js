@@ -51,17 +51,13 @@ if (meetup.data) {
         // Generate existing location input elements, calculate midpoint, show results, show link button
         await generateInputList(userLocations)
         await meetup.evaluateResult(open_sesame);
-        dom.elements.shareLinkBtn.classList.remove('hidden');
+        dom.elements.shareContainer.classList.remove('hidden')
         dom.updateMeetupResultElements(meetup)
     }
 }
 
-// Generate a contextualised description based on data inputs
-const subheading = meetup.evaluatePageSubheading(
-    sessionData.getMeetupCode(),
-    sessionData.getOrCreateUserId()
-);
-dom.elements.pageDescription.textContent = subheading;
+// Update meetup elements to show context
+updateMeetupContext()
 
 // Show main content and hide loading spinner
 dom.setLoadingVisibility(false)
@@ -79,6 +75,7 @@ async function generateInputList(userLocations) {
 
     // Show user's previous location inputs
     dom.populateAddressList(sessionData.getMeetupCode(), sessionData.getOrCreateUserId(), userLocations, addresses)
+    dom.elements.locationsContainer.classList.remove('hidden');
 }
 
 async function getCurrentLocationHandler() {
@@ -149,12 +146,8 @@ async function processLocationInput(latitude, longitude, placeId) {
         meetup.setNewState(meetupDocument);
     }
 
-    // Update page subheading with new context
-    const subheading = meetup.evaluatePageSubheading(
-        sessionData.getMeetupCode(),
-        sessionData.getOrCreateUserId()
-    );
-    dom.elements.pageDescription.textContent = subheading;
+    // Update meetup elements to show context
+    updateMeetupContext()
 
     // Evaluate meetup, getting results if possible.
     await meetup.evaluateResult(open_sesame);
@@ -173,9 +166,21 @@ async function processLocationInput(latitude, longitude, placeId) {
     }
 
     // Upon success, prompt user to share with friends
-    dom.elements.shareLinkBtn.classList.remove('hidden');
+    dom.elements.shareLinkBtn.classList.remove('hidden')
     dom.elements.resultsSection.classList.add('show');
     dom.setLoadingVisibility(false)
+}
+
+function updateMeetupContext() {
+    // Generate a contextualised description based on meetup data
+    const contextHeading = meetup.evaluateContextHeading(
+        sessionData.getMeetupCode(),
+        sessionData.getOrCreateUserId()
+    );
+    dom.elements.meetupContextHeader.textContent = contextHeading;
+
+    const contextText = meetup.evaluateContextText(sessionData.getOrCreateUserId());
+    dom.elements.meetupContextText.textContent = contextText;
 }
 
 function shareLink() {
@@ -203,5 +208,5 @@ function shareAddress() {
 
 // Add event listeners to HTML elements
 dom.elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
-dom.elements.shareLinkBtn.addEventListener("click", shareLink);
+dom.elements.shareContainer.addEventListener("click", shareLink);
 dom.elements.shareMidpointBtn.addEventListener("click", shareAddress);
