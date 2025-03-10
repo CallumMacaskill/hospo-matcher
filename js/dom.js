@@ -4,11 +4,13 @@ export class Dom {
     constructor() {
         this.elements = {
             loadingSpinner: document.getElementById('loading-spinner'),
-            mainContainer: document.getElementById('main-container'),
+            mainContainer: document.getElementById('main-content'),
             inputsSection: document.getElementById('inputs-section'),
-            inputsWrapper: document.getElementById('inputs-wrapper'),
-            pageDescription: document.getElementById('page-description'),
+            meetupContextHeader: document.getElementById('meetup-context-header'),
+            meetupContextText: document.getElementById('meetup-context-text'),
             getLocationBtn: document.getElementById("get-location-btn"),
+            locationsContainer: document.getElementById('locations-container'),
+            shareContainer: document.getElementById('share-container'),
             shareLinkBtn: document.getElementById("share-link-btn"),
             resultsSection: document.getElementById("results-section"),
             midpointText: document.getElementById("midpoint-text"),
@@ -75,6 +77,7 @@ export class Dom {
 
     initializeAutocomplete() {
         // Create the Place Autocomplete Element
+        console.log('Initialising places autocomplete widget')
         const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
     
         placeAutocomplete.addEventListener("focus", function (e) {
@@ -85,8 +88,9 @@ export class Dom {
         });
     
         // Insert the autocomplete element after the "Get Current Location" button
-        this.elements.inputsWrapper.insertBefore(placeAutocomplete, this.elements.getLocationBtn.nextSibling);
-        return placeAutocomplete; // Return for further manipulation if needed
+        console.log('Inserting widget')
+        this.elements.getLocationBtn.parentNode.insertBefore(placeAutocomplete, this.elements.getLocationBtn);
+        return placeAutocomplete;
     }
 
     populateAddressList(meetupCode, userId, locations, addresses) {

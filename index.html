@@ -4,33 +4,52 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hospo Matcher</title>
+  <title>Midpoint</title>
   <link rel="stylesheet" href="css/style.css">
+  <link rel="icon" type="image/png" href="assets/favicon-96x96.png" sizes="96x96" />
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+  <link rel="shortcut icon" href="assets/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="assets/apple-touch-icon.png" />
+  <link rel="manifest" href="assets/site.webmanifest" />
 </head>
 
 <body>
   <div class="section">
     <div class="content-wrapper">
-      <h2 class="page-heading">Midpoint</h2>
+      <a href="/" class="page-heading-link">
+        <h1 class="page-heading">Midpoint</h1>
+      </a>
+      <p id="page-subheading">Find the centre between you and your friends</p>
       <div id="loading-spinner-container">
         <div id="loading-spinner" class="spinner popup show"></div>
       </div>
     </div>
   </div>
 
-  <div id="main-container" class="popup">
-    <div id="inputs-section" class="section inputs-section popup show">
-      <div id="inputs-wrapper" class="content-wrapper">
-        <p id="page-description" class="page-description"></p>
-        <div id="address-list-container">
+  <div id="main-content" class="popup">
+    <!-- Meetup context and inputs -->
+    <div class="section popup show">
+      <div class="content-wrapper">
+        <div id="meetup-context" class="container">
+          <h3 id="meetup-context-header"></h3>
+          <p id="meetup-context-text"></p>
+        </div>
+        <div id="locations-container" class="container hidden">
+          <h3>Your Locations</h3>
           <ul id="address-list"></ul>
         </div>
-        <button id="get-location-btn" class="btn primary">Use my Current Location</button>
-        <button id="share-link-btn" class="btn secondary hidden">Share Meetup</button>
+        <div class="container">
+          <h3>Add Location</h3>
+          <button id="get-location-btn" class="btn primary">Use my Current Location</button>
+        </div>
+        <div id="share-container" class="container hidden">
+          <button id="share-link-btn" class="btn secondary">Share Meetup</button>
+        </div>
       </div>
     </div>
-  
-    <div id="results-section" class="section results-section popup">
+    
+    <!-- Results -->
+    <div id="results-section" class="section alternate results popup">
       <div class="content-wrapper">
         <p id="midpoint-text" class="midpoint-text"></p>
         <button id="share-midpoint-btn" class="btn primary popup"></button>
@@ -40,7 +59,6 @@
     </div>
   </div>
   
-
   <!-- Link to external JavaScript file -->
   <script src="js/script.js" type="module"></script>
 </body>
