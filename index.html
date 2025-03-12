@@ -19,48 +19,55 @@
       <a href="/" class="page-heading-link">
         <h1 class="page-heading">Midpoint</h1>
       </a>
-      <p id="page-subheading">Find the centre between you and your friends</p>
-      <div id="loading-spinner-container">
-        <div id="loading-spinner" class="spinner popup show"></div>
-      </div>
     </div>
+    <div id="loading-spinner-container">
+      <div id="loading-spinner" class="spinner popup show"></div>
+    </div>
+  </div>
   </div>
 
   <div id="main-content" class="popup">
-    <!-- Meetup context and inputs -->
-    <div class="section popup show">
+    <div class="section">
       <div class="content-wrapper">
-        <div id="meetup-context" class="container">
-          <h3 id="meetup-context-header"></h3>
-          <p id="meetup-context-text"></p>
+        <div id="description-container" class="container">
+          <p>Midpoint helps you meet in the middle by finding the central location between you and your friends.</p>
         </div>
-        <div id="locations-container" class="container hidden">
-          <h3>Your Locations</h3>
-          <ul id="address-list"></ul>
+        <div id="context-container" class="container">
+          <p id="context-text"></p>
         </div>
-        <div class="container">
-          <h3>Add Location</h3>
-          <button id="get-location-btn" class="btn primary">Use my Current Location</button>
+        <div id="locations-container" class="container">
+          <h3 id="locations-list-header">Meetup Locations</h3>
+          <ul id="locations-list"></ul>
         </div>
-        <div id="share-container" class="container hidden">
+        <p id="instruction"></p>
+        <div id="flow-choice-container" class="container">
+          <button id="share-flow-btn" class="btn primary">I'll share a link with my friends</button>
+          <button id="manual-flow-btn" class="btn secondary">I'll add their locations myself</button>
+        </div>
+        <div id="location-inputs-container" class="container">
+          <h3>Search places</h3>
+          <button id="get-location-btn" class="btn secondary">Use my Current Location</button>
+        </div>
+        <div id="share-container" class="container">
           <button id="share-link-btn" class="btn secondary">Share Meetup</button>
         </div>
       </div>
     </div>
-    
-    <!-- Results -->
-    <div id="results-section" class="section alternate results popup">
+
+    <div id="results-section" class="section alternate results hidden">
       <div class="content-wrapper">
-        <p id="midpoint-text" class="midpoint-text"></p>
-        <button id="share-midpoint-btn" class="btn primary popup"></button>
-        <p id="places-text" class="places-text popup">Nearby cafes and restaurants</p>
-        <div id="places-list"></div>
+        <div id="results-container" class="container">
+          <h3 id="midpoint-context"></h3>
+          <button id="share-midpoint-btn" class="btn primary"></button>
+          <p id="places-text" class="places-text">Nearby cafes and restaurants</p>
+          <div id="places-list"></div>
+        </div>
       </div>
     </div>
   </div>
-  
+
   <!-- Link to external JavaScript file -->
-  <script src="js/script.js" type="module"></script>
+  <script src="js/main.js" type="module"></script>
 </body>
 
 </html>

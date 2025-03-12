@@ -1,3 +1,4 @@
+const crypto = require("crypto");
 const { MongoClient } = require("mongodb");
 
 const mongoClient = new MongoClient(process.env.MONGODB_URI);
@@ -13,20 +14,22 @@ export const handler = async (event) => {
   var { latitude } = event.queryStringParameters
   var { longitude } = event.queryStringParameters
   const { placeId } = event.queryStringParameters
+  const locationId = crypto.randomUUID();
 
   // Convert query string to a decimal
   latitude = parseFloat(latitude)
   longitude = parseFloat(longitude)
 
   var update_body = {
-    [`user_coordinates.${userId}`]: {
+    [`user_locations.${userId}`]: {
+      "id": locationId,
       "latitude": latitude,
       "longitude": longitude
     }
   };
 
   if (placeId) {
-    update_body[`user_coordinates.${userId}`]['place_id'] = placeId;
+    update_body[`user_locations.${userId}`]['place_id'] = placeId;
   }
   console.log('Update body');
   console.log(update_body);

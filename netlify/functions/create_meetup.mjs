@@ -14,6 +14,8 @@ export const handler = async (event) => {
     var { latitude } = event.queryStringParameters
     var { longitude } = event.queryStringParameters
     const { placeId } = event.queryStringParameters
+    const locationId = crypto.randomUUID();
+
 
     // Convert query string to a decimal
     latitude = parseFloat(latitude)
@@ -24,6 +26,7 @@ export const handler = async (event) => {
 
     // Construct user coordinates element
     var location = {
+        "id": locationId,
         "latitude": latitude,
         "longitude": longitude
     }
@@ -33,8 +36,8 @@ export const handler = async (event) => {
 
     meetup = {
         "code": uuid,
-        "created_at": datetime,
-        "user_coordinates": {
+        "created_datetime": datetime,
+        "user_locations": {
             [userId]: [location]
         }
     }
