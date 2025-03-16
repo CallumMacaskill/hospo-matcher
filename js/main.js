@@ -47,7 +47,7 @@ const featureRegistry = {
     flowChoice: new FeatureFlowChoice(dom.elements.flowChoiceContainer),
     description: new FeatureDescription(dom.elements.descriptionContainer),
     context: new FeatureContext(dom.elements.contextContainer, dom.elements.contextText),
-    meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer, generateMeetupLocations),
+    meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer),
     instruction: new FeatureInstruction(dom.elements.instruction),
     locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer),
     results: new FeatureResults(dom.elements.resultsSection, open_sesame),
