@@ -10,42 +10,55 @@ export const handler = async (event) => {
     console.log(event.queryStringParameters);
     const { code } = event.queryStringParameters
     const { userId } = event.queryStringParameters
-    var { latitude } = event.queryStringParameters
-    var { longitude } = event.queryStringParameters
-    const { placeId } = event.queryStringParameters
-
-    // Convert query string to a decimal
-    latitude = parseFloat(latitude)
-    longitude = parseFloat(longitude)
+    const { locationId } = event.queryStringParameters
 
     // Connect to MongoDB
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
     const collection = database.collection(process.env.MONGODB_COLLECTION);
 
     // Define the update operation using $pull
-    const filter = {
+    const locationFilter = {
         "code": code
     };
 
-    const update = {
+    const locationUpdate = {
         $pull: {
-            [`user_coordinates.${userId}`]: {
-                "latitude": latitude,
-                "longitude": longitude
+            [`user_locations.${userId}`]: {
+                "id": locationId,
             }
         }
     };
 
-    if (placeId) {
-        update.$pull[`user_coordinates.${userId}`]["place_id"] = placeId;
-    }
     console.log('Filter:')
-    console.log(filter)
+    console.log(locationFilter)
     console.log('Update:')
-    console.log(update)
+    console.log(locationUpdate)
 
     // Execute the update operation
-    const updateResult = await collection.updateOne(filter, update);
+    const locationUpdateResult = await collection.updateOne(locationFilter, locationUpdate);
+
+    // Filter to find documents where user_locations.${userId} exists and is an empty array
+    const userLocationsFilter = {
+        code: code,
+        [`user_locations.${userId}`]: {
+            $exists: true,
+            $size: 0
+        }
+    };
+
+    // Update operation to remove the specific userId entry from user_locations
+    const userLocationsUpdate = {
+        $unset: {
+            [`user_locations.${userId}`]: ""
+        }
+    };
+
+    // Perform the update operation
+    const userLocationsUpdateResult = await collection.updateOne(userLocationsFilter, userLocationsUpdate);
+
+    if (userLocationsUpdateResult.modifiedCount === 1) {
+        console.log("User's locations record removed successfully");
+    }
 
     if (updateResult['modifiedCount'] == 1) {
         return {

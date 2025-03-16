@@ -23,7 +23,7 @@ export class Meetup {
         let totalLongitude = 0;
     
         // Iterate through the lists and accumulate latitude and longitude values
-        Object.values(this.data['user_coordinates']).forEach(list => {
+        Object.values(this.data['user_locations']).forEach(list => {
             list.forEach(coord => {
                 if (coord.latitude && coord.longitude) {
                     totalLatitude += parseFloat(coord.latitude);
@@ -40,18 +40,16 @@ export class Meetup {
     }
 
     async evaluateResult(open_sesame) {
-        console.log('Evaluating result')
-        let resultMessage = "Only one location submitted. Add more or invite friends to find your midpoint."
-    
+        console.log('Evaluating result')    
         // Calculate the number of locations submitted
-        const numLocations = Object.values(this.data.user_coordinates).reduce((sum, list) => sum + list.length, 0);
+        const numLocations = Object.values(this.data.user_locations).reduce((sum, list) => sum + list.length, 0);
     
         if (numLocations > 1) {
             // Calculate midpoint coordinates
             this.calculateMidpoint(numLocations);
     
             // Update midpoint element text
-            resultMessage = `Your midpoint between ${numLocations} locations`;
+            this.resultMessage = `Your midpoint between ${numLocations} locations`;
     
             const address = await reverseGeocodeLocation(this.resultLocation);
             this.resultAddress = address
@@ -59,8 +57,6 @@ export class Meetup {
             // Search nearby Places
             this.nearbyPlaces = await searchNearbyPlaces(this.resultLocation, open_sesame);
         }
-
-        this.resultMessage = resultMessage;
     }
 
     evaluateContextHeading(code, userId) {
@@ -70,7 +66,7 @@ export class Meetup {
             const code_substring = code.substring(0, 6);
     
             // Check if user has already submitted location
-            const userLocations = this.data['user_coordinates'][userId];
+            const userLocations = this.data['user_locations'][userId];
             if (userLocations && userLocations.length > 0) {
                 page_description = `You've joined meetup #${code_substring}`;
             } else {
@@ -87,7 +83,7 @@ export class Meetup {
             // Calculate values
             let otherIds = 0;
             let otherLocations = 0;
-            for (const [id, list] of Object.entries(this.data['user_coordinates'])) {
+            for (const [id, list] of Object.entries(this.data['user_locations'])) {
                 // Only include IDs with non-empty lists
                 if (id !== userId && list.length > 0) {
                     otherIds++;  
@@ -96,7 +92,7 @@ export class Meetup {
             }
             
             // Build string
-            if (otherIds === 0 && otherLocations === 0 && this.data['user_coordinates'][userId].length > 0) {
+            if (otherIds === 0 && otherLocations === 0 && this.data['user_locations'][userId].length > 0) {
                 subheading = "Only you've added locations"
             } else if (otherIds > 0 && otherLocations >0) {
                 const friendText = otherIds === 1 ? 'friend has' : 'friends have';

@@ -1,7 +1,8 @@
 import { Dom } from './dom.js';
+import { FeatureFlowChoice, FeatureDescription, FeatureContext, FeatureMeetupLocations, FeatureInstruction, FeatureLocationInputs, FeatureResults, FeatureShare, evaluateFeatures } from './features.js'
 import { Meetup } from './meetup.js';
 import { SessionData } from './session.js';
-import { loadGoogleMapsApi, reverseGeocodeLocation } from './maps_platform.js';
+import { loadGoogleMapsApi } from './maps_platform.js';
 import { generateCrudUrl } from './utils.js';
 
 const baseURL = window.location.origin + "/";
@@ -28,12 +29,11 @@ placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
 
 // Load current user's browser data
 var sessionData = new SessionData()
-var meetup = new Meetup();
+var meetup = new Meetup()
 
-// Get meetup data if available
+// Check if user is at the start of a flow
 if (sessionData.getMeetupCode()) {
     console.log(`Using meetup code: ${sessionData.getMeetupCode()}`);
-    console.log(`Reading meetup from database`)
     const url = generateCrudUrl('/.netlify/functions/read_meetup', {
         code: sessionData.getMeetupCode()
     });
@@ -43,58 +43,48 @@ if (sessionData.getMeetupCode()) {
     meetup.setNewState(meetupDocument);
 }
 
-// Check if user has already submitted location.
-if (meetup.data) {
-    const userId = sessionData.getOrCreateUserId();
-    const userLocations = meetup.data['user_coordinates'][userId];
-    if (userLocations && userLocations.length > 0) {
-        // Generate existing location input elements, calculate midpoint, show results, show link button
-        await generateInputList(userLocations)
-        await meetup.evaluateResult(open_sesame);
-        dom.elements.shareContainer.classList.remove('hidden')
-        dom.updateMeetupResultElements(meetup)
-    }
+const featureRegistry = {
+    flowChoice: new FeatureFlowChoice(dom.elements.flowChoiceContainer),
+    description: new FeatureDescription(dom.elements.descriptionContainer),
+    context: new FeatureContext(dom.elements.contextContainer, dom.elements.contextText),
+    meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer),
+    instruction: new FeatureInstruction(dom.elements.instruction),
+    locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer),
+    results: new FeatureResults(dom.elements.resultsSection, open_sesame),
+    share: new FeatureShare(dom.elements.shareContainer),
 }
 
-// Update meetup elements to show context
-updateMeetupContext()
+await updatePage(featureRegistry, meetup, sessionData, dom);
 
 // Show main content and hide loading spinner
-dom.setLoadingVisibility(false)
+await dom.setLoadingVisibility(false)
 
-async function generateInputList(userLocations) {
-    console.log(`Getting addresses of user's ${userLocations.length} existing locations`)
-    // Map each userId to a promise that eventually fulfills with the address
-    const promises = userLocations.map(async (location) => {
-        const address = await reverseGeocodeLocation(location);
-        return address;
-    });
-    
-    // Wait for all promises to fulfill
-    const addresses = await Promise.all(promises);
-
-    // Show user's previous location inputs
-    dom.populateAddressList(sessionData.getMeetupCode(), sessionData.getOrCreateUserId(), userLocations, addresses)
-    dom.elements.locationsContainer.classList.remove('hidden');
+function evaluateFlowState(meetup) {
+    // Define variables which determine element visibilities
+    console.log('Creating variables for feature requirement checks')
+    const userId = sessionData.getOrCreateUserId();
+    const userLocations = meetup.data ? meetup.data['user_locations'] : {};
+    const hasMeetupData = !!meetup.data;
+    const isManualFlow = sessionStorage.getItem('manual_flow') === 'true';
+    const isShareFlow = sessionStorage.getItem('share_flow') === 'true';
+    const numUsers = Object.keys(userLocations).length;
+    const numLocations = meetup.data ? Object.values(userLocations).flat().length : 0;
+    return { hasMeetupData, isManualFlow, isShareFlow, userId, userLocations, numUsers, numLocations };
 }
 
-async function getCurrentLocationHandler() {
-    const { latitude, longitude } = await new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    });
-                },
-                (error) => reject(error)
-            );
-        } else {
-            reject(new Error("Geolocation not supported"));
-        }
+async function updatePage(featureRegistry, meetup, meetupCode, dom) {
+    const featureVariableMapping = new Map(); // Use a Map for better instance-based lookup
+    featureVariableMapping.set(featureRegistry.results, { 
+        meetup: meetup, 
+        dom: dom,
     });
-    processLocationInput(latitude, longitude);
+    featureVariableMapping.set(featureRegistry.meetupLocations, {
+        meetupCode: meetupCode,
+        dom: dom,
+    });
+
+    const flowStateData = evaluateFlowState(meetup)
+    await evaluateFeatures(featureRegistry, flowStateData, featureVariableMapping)
 }
 
 async function processLocationInput(latitude, longitude, placeId) {
@@ -146,16 +136,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         meetup.setNewState(meetupDocument);
     }
 
-    // Update meetup elements to show context
-    updateMeetupContext()
-
-    // Evaluate meetup, getting results if possible.
-    await meetup.evaluateResult(open_sesame);
-
-    // Show user's previous location inputs
-    await generateInputList(meetup.data.user_coordinates[sessionData.getOrCreateUserId()])
-
-    dom.updateMeetupResultElements(meetup)
+    await updatePage(featureRegistry, meetup, sessionData.getMeetupCode(), dom);
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
@@ -165,22 +146,33 @@ async function processLocationInput(latitude, longitude, placeId) {
         await new Promise((resolve) => setTimeout(resolve, timeRemaining));
     }
 
-    // Upon success, prompt user to share with friends
-    dom.elements.shareLinkBtn.classList.remove('hidden')
-    dom.elements.resultsSection.classList.add('show');
     dom.setLoadingVisibility(false)
 }
 
-function updateMeetupContext() {
-    // Generate a contextualised description based on meetup data
-    const contextHeading = meetup.evaluateContextHeading(
-        sessionData.getMeetupCode(),
-        sessionData.getOrCreateUserId()
-    );
-    dom.elements.meetupContextHeader.textContent = contextHeading;
+async function getCurrentLocationHandler() {
+    const { latitude, longitude } = await new Promise((resolve, reject) => {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => reject(error)
+            );
+        } else {
+            reject(new Error("Geolocation not supported"));
+        }
+    });
+    processLocationInput(latitude, longitude);
+}
 
-    const contextText = meetup.evaluateContextText(sessionData.getOrCreateUserId());
-    dom.elements.meetupContextText.textContent = contextText;
+async function setFlow(flowName) {
+    console.log(`Setting ${flowName} to ${true}`)
+    sessionStorage.setItem(flowName, true);
+    await dom.setLoadingVisibility(true)
+    location.reload()
 }
 
 function shareLink() {
@@ -206,7 +198,17 @@ function shareAddress() {
     });
 }
 
-// Add event listeners to HTML elements
+async function resetFlow() {
+    await dom.setLoadingVisibility(true)
+    sessionStorage.removeItem("manual_flow");
+    sessionStorage.removeItem("share_flow");
+    window.location.href = "/";
+}
+
+// Create button event listeners
+dom.elements.pageHeadingBtn.addEventListener("click", () => resetFlow());
+dom.elements.manualFlowBtn.addEventListener("click", () => setFlow("manual_flow"));
+dom.elements.shareFlowBtn.addEventListener("click", () => setFlow("share_flow"));
 dom.elements.getLocationBtn.addEventListener("click", getCurrentLocationHandler);
 dom.elements.shareContainer.addEventListener("click", shareLink);
 dom.elements.shareMidpointBtn.addEventListener("click", shareAddress);
