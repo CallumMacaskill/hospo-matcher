@@ -391,7 +391,6 @@ p {
     text-overflow: ellipsis;
 }
 
-/* Do I need this??????????? */
 #locations-list {
     list-style-type: none;
     padding: 0;
