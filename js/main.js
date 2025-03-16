@@ -1,5 +1,5 @@
 import { Dom } from './dom.js';
-import { FeatureFlowChoice, FeatureDescription, FeatureContext, FeatureMeetupLocations, FeatureInstruction, FeatureLocationInputs, FeatureResults, FeatureShare, FeatureManager } from './features.js'
+import { FeatureFlowChoice, FeatureDescription, FeatureContext, FeatureMeetupLocations, FeatureInstruction, FeatureLocationInputs, FeatureResults, FeatureShare, evaluateFeatures } from './features.js'
 import { Meetup } from './meetup.js';
 import { SessionData } from './session.js';
 import { loadGoogleMapsApi } from './maps_platform.js';
@@ -54,20 +54,7 @@ const featureRegistry = {
     share: new FeatureShare(dom.elements.shareContainer),
 }
 
-let featureManager = new FeatureManager();
-
-const featureVariableMapping = new Map(); // Use a Map for better instance-based lookup
-featureVariableMapping.set(featureRegistry.results, { 
-    meetup: meetup, 
-    dom: dom,
-});
-featureVariableMapping.set(featureRegistry.meetupLocations, {
-    meetupCode: sessionData.getMeetupCode(),
-    dom: dom,
-})
-
-const flowStateData = evaluateFlowState(meetup)
-await featureManager.evaluateFeatures(featureRegistry, flowStateData, featureVariableMapping)
+await updatePage(featureRegistry, meetup, sessionData, dom);
 
 // Show main content and hide loading spinner
 await dom.setLoadingVisibility(false)
@@ -83,6 +70,21 @@ function evaluateFlowState(meetup) {
     const numUsers = Object.keys(userLocations).length;
     const numLocations = meetup.data ? Object.values(userLocations).flat().length : 0;
     return { hasMeetupData, isManualFlow, isShareFlow, userId, userLocations, numUsers, numLocations };
+}
+
+async function updatePage(featureRegistry, meetup, meetupCode, dom) {
+    const featureVariableMapping = new Map(); // Use a Map for better instance-based lookup
+    featureVariableMapping.set(featureRegistry.results, { 
+        meetup: meetup, 
+        dom: dom,
+    });
+    featureVariableMapping.set(featureRegistry.meetupLocations, {
+        meetupCode: meetupCode,
+        dom: dom,
+    });
+
+    const flowStateData = evaluateFlowState(meetup)
+    await evaluateFeatures(featureRegistry, flowStateData, featureVariableMapping)
 }
 
 async function processLocationInput(latitude, longitude, placeId) {
@@ -134,14 +136,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         meetup.setNewState(meetupDocument);
     }
 
-    // Update state data and evaluate features and results
-    featureVariableMapping.set(featureRegistry.results, { 
-        meetup: meetup, 
-        dom: dom
-    });
-
-    const flowStateData = evaluateFlowState(meetup)
-    await featureManager.evaluateFeatures(featureRegistry, flowStateData, featureVariableMapping)
+    await updatePage(featureRegistry, meetup, sessionData.getMeetupCode(), dom);
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;

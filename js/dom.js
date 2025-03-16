@@ -103,7 +103,7 @@ export class Dom {
     }
 
     populateLocationsList(meetupCode, userId, allLocations) {
-        console.log('Populating locations list')
+        console.log(`Populating locations list for ${meetupCode} with ${userId}`)
         // Clear the existing list
         const locationsList = this.elements.locationsList;
         locationsList.innerHTML = "";

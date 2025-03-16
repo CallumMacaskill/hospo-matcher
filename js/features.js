@@ -2,7 +2,7 @@ import { reverseGeocodeLocation } from "./maps_platform.js";
 
 class FeatureBase {
 
-    constructor (element) {
+    constructor(element) {
         console.log(`Creating feature for element ${element.id}`)
         this.element = element;
     }
@@ -17,7 +17,7 @@ class FeatureBase {
 };
 
 export class FeatureFlowChoice extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
     }
 
@@ -27,7 +27,7 @@ export class FeatureFlowChoice extends FeatureBase {
 }
 
 export class FeatureDescription extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
     }
 
@@ -35,12 +35,12 @@ export class FeatureDescription extends FeatureBase {
         return (
             (!hasMeetupData && !isManualFlow && !isShareFlow) // Hasn't joined meetup and hasn't chosen a flow
             || (hasMeetupData && !(userId in userLocations) // Joined meetup but hasn't added location
-        ));
+            ));
     }
 }
 
 export class FeatureContext extends FeatureBase {
-    constructor (element, contextTextElement) {
+    constructor(element, contextTextElement) {
         super(element);
         this.contextTextElement = contextTextElement;
     }
@@ -59,7 +59,7 @@ export class FeatureContext extends FeatureBase {
 }
 
 export class FeatureMeetupLocations extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
     }
 
@@ -71,14 +71,15 @@ export class FeatureMeetupLocations extends FeatureBase {
     }
 
     async onShow({ userId, userLocations }, { meetupCode, dom }) {
+        console.log(`Using param: ${meetupCode}`)
         // Create flat version of user locations with user IDs added
         var allLocations = Object.entries(userLocations)
-        .flatMap(([userId, locations]) =>
-            locations.map(location => ({
-            ...location, // Spread the existing location object
-            userId: userId // Add the userId as a new property
-            }))
-        );
+            .flatMap(([userId, locations]) =>
+                locations.map(location => ({
+                    ...location, // Spread the existing location object
+                    userId: userId // Add the userId as a new property
+                }))
+            );
 
         // Map each location to a promise that eventually fulfills with the address
         console.log(`Getting addresses of ${allLocations.length} meetup locations`)
@@ -94,14 +95,14 @@ export class FeatureMeetupLocations extends FeatureBase {
         allLocations.forEach((location, index) => {
             location.formattedAddress = addresses[index];
         });
-        
+
         // Show user's previous location inputs
         dom.populateLocationsList(meetupCode, userId, allLocations)
     }
 }
 
 export class FeatureInstruction extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
         this.chooseFlow = 'How would you like to add locations?';
         this.startShareFlow = 'Start by adding your location';
@@ -115,7 +116,7 @@ export class FeatureInstruction extends FeatureBase {
         return true;
     }
 
-    onShow({ isShareFlow, isManualFlow, hasMeetupData, numLocations, userId, userLocations}) {
+    onShow({ isShareFlow, isManualFlow, hasMeetupData, numLocations, userId, userLocations }) {
         var instructionText = "";
         if (!isShareFlow && !isManualFlow && !hasMeetupData) {
             instructionText = this.chooseFlow;
@@ -135,7 +136,7 @@ export class FeatureInstruction extends FeatureBase {
 }
 
 export class FeatureLocationInputs extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
     }
 
@@ -145,12 +146,12 @@ export class FeatureLocationInputs extends FeatureBase {
             || (!hasMeetupData && isShareFlow) // Starting share flow
             || (hasMeetupData && isManualFlow) // Manual flow in progress
             || (hasMeetupData && !(userId in userLocations) // Joined meetup but hasn't added location
-        ));
+            ));
     }
 }
 
 export class FeatureResults extends FeatureBase {
-    constructor (element, open_sesame) {
+    constructor(element, open_sesame) {
         super(element);
         this.open_sesame = open_sesame;
     }
@@ -162,14 +163,14 @@ export class FeatureResults extends FeatureBase {
         );
     }
 
-    async onShow( {}, { meetup, dom }) {
+    async onShow({ }, { meetup, dom }) {
         await meetup.evaluateResult(this.open_sesame);
         dom.updateMeetupResultElements(meetup);
     }
 }
 
 export class FeatureShare extends FeatureBase {
-    constructor (element) {
+    constructor(element) {
         super(element);
     }
 
@@ -178,23 +179,21 @@ export class FeatureShare extends FeatureBase {
     }
 }
 
-export class FeatureManager {
-    async evaluateFeatures(features, flowStateData, featureVariableMapping) {
-        // Perform requirement checks on each element
-        for (const feature of Object.values(features)) {
-            console.log(`Checking data requirements for ${feature.element.id}`);
-            const shouldShow = feature.shouldShow(flowStateData);
-            console.log(`Showing ${feature.element.id}: ${shouldShow}`);
+export async function evaluateFeatures(features, flowStateData, featureVariableMapping) {
+    // Perform requirement checks on each element
+    for (const feature of Object.values(features)) {
+        console.log(`Checking data requirements for ${feature.element.id}`);
+        const shouldShow = feature.shouldShow(flowStateData);
+        console.log(`Showing ${feature.element.id}: ${shouldShow}`);
 
-            if (shouldShow) {
-                if (feature.onShow) {
-                    const extraArgs = featureVariableMapping.get(feature) || {}; // Default to empty object
-                    await feature.onShow(flowStateData, extraArgs);
-                }
-                feature.element.classList.remove('hidden');
-            } else {
-                feature.element.classList.add('hidden');
+        if (shouldShow) {
+            if (feature.onShow) {
+                const extraArgs = featureVariableMapping.get(feature) || {}; // Default to empty object
+                await feature.onShow(flowStateData, extraArgs);
             }
+            feature.element.classList.remove('hidden');
+        } else {
+            feature.element.classList.add('hidden');
         }
     }
 }
