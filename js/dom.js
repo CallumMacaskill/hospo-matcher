@@ -139,7 +139,6 @@ export class Dom {
 
                     const response = await fetch(url);
                     await response.json();
-                    await this.setLoadingVisibility(false);
                     window.location.reload();
                 });
 
