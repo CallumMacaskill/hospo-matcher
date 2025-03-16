@@ -3,6 +3,7 @@ import { generateCrudUrl } from './utils.js';
 export class Dom {
     constructor() {
         this.elements = {
+            pageHeadingBtn: document.getElementById('page-heading-btn'),
             loadingSpinner: document.getElementById('loading-spinner'),
             descriptionContainer: document.getElementById('description-container'),
             contextContainer: document.getElementById('context-container'),
@@ -102,6 +103,7 @@ export class Dom {
     }
 
     populateLocationsList(meetupCode, userId, allLocations) {
+        console.log('Populating locations list')
         // Clear the existing list
         const locationsList = this.elements.locationsList;
         locationsList.innerHTML = "";

@@ -198,8 +198,8 @@ p {
     font-size: 14px
 }
 
-.page-heading-link {
-    text-decoration: none; /* Remove underline */
+#page-heading-btn {
+    all: unset; /* Resets all default button styles */
     color: inherit; /* Use the default text color */
     cursor: pointer; /* Make it feel clickable */
 }
