@@ -74,7 +74,7 @@ export async function searchNearbyPlaces(location, open_sesame) {
         }
         const data = await response.json();
         const places = data.places;
-        console.log(`Received ${places.length} places`);
+        console.log(`Received places: ${places}`)
         return places;
     } catch (error) {
         console.error("Unexpected error:", error);

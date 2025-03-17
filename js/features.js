@@ -170,6 +170,9 @@ export class FeatureResults extends FeatureBase {
 
     async onShow({ }, { meetup, dom }) {
         await meetup.evaluateResult(this.open_sesame);
+        if (!meetup.nearbyPlaces) {
+            dom.elements.placesText.classList.add('hidden');
+        }
         dom.updateMeetupResultElements(meetup);
     }
 }

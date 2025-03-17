@@ -54,7 +54,7 @@ const featureRegistry = {
     share: new FeatureShare(dom.elements.shareContainer),
 }
 
-await updatePage(featureRegistry, meetup, sessionData, dom);
+await updatePage(featureRegistry, meetup, dom);
 
 // Show main content and hide loading spinner
 await dom.setLoadingVisibility(false)
@@ -72,14 +72,14 @@ function evaluateFlowState(meetup) {
     return { hasMeetupData, isManualFlow, isShareFlow, userId, userLocations, numUsers, numLocations };
 }
 
-async function updatePage(featureRegistry, meetup, meetupCode, dom) {
+async function updatePage(featureRegistry, meetup, dom) {
     const featureVariableMapping = new Map(); // Use a Map for better instance-based lookup
     featureVariableMapping.set(featureRegistry.results, { 
         meetup: meetup, 
         dom: dom,
     });
     featureVariableMapping.set(featureRegistry.meetupLocations, {
-        meetupCode: meetupCode,
+        meetupCode: meetup.data['code'],
         dom: dom,
     });
 
@@ -136,7 +136,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         meetup.setNewState(meetupDocument);
     }
 
-    await updatePage(featureRegistry, meetup, sessionData.getMeetupCode(), dom);
+    await updatePage(featureRegistry, meetup, dom);
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
