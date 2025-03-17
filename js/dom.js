@@ -16,6 +16,7 @@ export class Dom {
             shareFlowBtn: document.getElementById('share-flow-btn'),
             manualFlowBtn: document.getElementById('manual-flow-btn'),
             locationInputsContainer: document.getElementById('location-inputs-container'),
+            geolocationError: document.getElementById('geolocation-error'),
             getLocationBtn: document.getElementById("get-location-btn"),
             shareContainer: document.getElementById('share-container'),
             shareLinkBtn: document.getElementById("share-link-btn"),
@@ -101,6 +102,19 @@ export class Dom {
         this.elements.getLocationBtn.parentNode.insertBefore(placeAutocomplete, this.elements.getLocationBtn);
         return placeAutocomplete;
     }
+
+    showGeolocationPermissionsError(error) {
+        let errorText = "Location information is unavailable. Try searching instead."
+        switch(error.code) {
+          case error.PERMISSION_DENIED:
+            errorText = "Try again and approve permissions to use your location."
+          case error.UNKNOWN_ERROR:
+            errorText = "An unknown error occurred. Try searching for a location instead."
+            break;
+        }
+        this.elements.geolocationError.innerHTML = errorText;
+        this.elements.geolocationError.classList.remove('hidden');
+      }
 
     populateLocationsList(meetupCode, userId, allLocations) {
         console.log(`Populating locations list for ${meetupCode} with ${userId}`)

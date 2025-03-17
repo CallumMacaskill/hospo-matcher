@@ -63,9 +63,9 @@ export class FeatureMeetupLocations extends FeatureBase {
         super(element);
     }
 
-    shouldShow({ hasMeetupData, isManualFlow, userId, userLocations }) {
+    shouldShow({ numLocations, hasMeetupData, isManualFlow, userId, userLocations }) {
         return (
-            (hasMeetupData && isManualFlow) // Manual flow in progress
+            (numLocations >= 1 && isManualFlow) // Manual flow in progress
             || (hasMeetupData && userId in userLocations) // Joined meetup and added a location
         );
     }
@@ -136,8 +136,9 @@ export class FeatureInstruction extends FeatureBase {
 }
 
 export class FeatureLocationInputs extends FeatureBase {
-    constructor(element) {
+    constructor(element, errorElement) {
         super(element);
+        this.errorElement = errorElement;
     }
 
     shouldShow({ hasMeetupData, isManualFlow, isShareFlow, userId, userLocations }) {
@@ -147,6 +148,10 @@ export class FeatureLocationInputs extends FeatureBase {
             || (hasMeetupData && isManualFlow) // Manual flow in progress
             || (hasMeetupData && !(userId in userLocations) // Joined meetup but hasn't added location
             ));
+    }
+
+    onShow() {
+        this.errorElement.classList.add('hidden');
     }
 }
 
@@ -165,6 +170,9 @@ export class FeatureResults extends FeatureBase {
 
     async onShow({ }, { meetup, dom }) {
         await meetup.evaluateResult(this.open_sesame);
+        if (!meetup.nearbyPlaces) {
+            dom.elements.placesText.classList.add('hidden');
+        }
         dom.updateMeetupResultElements(meetup);
     }
 }

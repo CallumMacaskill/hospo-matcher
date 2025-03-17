@@ -49,12 +49,12 @@ const featureRegistry = {
     context: new FeatureContext(dom.elements.contextContainer, dom.elements.contextText),
     meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer),
     instruction: new FeatureInstruction(dom.elements.instruction),
-    locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer),
+    locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer, dom.elements.geolocationError),
     results: new FeatureResults(dom.elements.resultsSection, open_sesame),
     share: new FeatureShare(dom.elements.shareContainer),
 }
 
-await updatePage(featureRegistry, meetup, sessionData, dom);
+await updatePage(featureRegistry, meetup, dom);
 
 // Show main content and hide loading spinner
 await dom.setLoadingVisibility(false)
@@ -72,14 +72,14 @@ function evaluateFlowState(meetup) {
     return { hasMeetupData, isManualFlow, isShareFlow, userId, userLocations, numUsers, numLocations };
 }
 
-async function updatePage(featureRegistry, meetup, meetupCode, dom) {
+async function updatePage(featureRegistry, meetup, dom) {
     const featureVariableMapping = new Map(); // Use a Map for better instance-based lookup
     featureVariableMapping.set(featureRegistry.results, { 
         meetup: meetup, 
         dom: dom,
     });
     featureVariableMapping.set(featureRegistry.meetupLocations, {
-        meetupCode: meetupCode,
+        meetupCode: meetup.data ? meetup.data["code"] : null,
         dom: dom,
     });
 
@@ -136,7 +136,7 @@ async function processLocationInput(latitude, longitude, placeId) {
         meetup.setNewState(meetupDocument);
     }
 
-    await updatePage(featureRegistry, meetup, sessionData.getMeetupCode(), dom);
+    await updatePage(featureRegistry, meetup, dom);
 
     // Artificial wait time to smooth animations if necessary
     const timeElapsed = performance.now() - timeStart;
@@ -150,23 +150,25 @@ async function processLocationInput(latitude, longitude, placeId) {
 }
 
 async function getCurrentLocationHandler() {
-    const { latitude, longitude } = await new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    });
-                },
-                (error) => reject(error)
-            );
-        } else {
-            reject(new Error("Geolocation not supported"));
+    await dom.setLoadingVisibility(true);
+    
+    if (!navigator.geolocation) {
+        dom.showGeolocationPermissionsError(new Error("Geolocation not supported"));
+        await dom.setLoadingVisibility(false);
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            await processLocationInput(position.coords.latitude, position.coords.longitude);
+        },
+        async (error) => {
+            dom.showGeolocationPermissionsError(error);
+            await dom.setLoadingVisibility(false);
         }
-    });
-    processLocationInput(latitude, longitude);
+    );
 }
+
 
 async function setFlow(flowName) {
     console.log(`Setting ${flowName} to ${true}`)

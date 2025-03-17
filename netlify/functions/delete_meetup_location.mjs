@@ -60,11 +60,11 @@ export const handler = async (event) => {
         console.log("User's locations record removed successfully");
     }
 
-    if (updateResult['modifiedCount'] == 1) {
+    if (locationUpdateResult['modifiedCount'] == 1) {
         return {
             statusCode: 200,
             body: JSON.stringify({
-                updateResult: updateResult
+                locationUpdateResult: locationUpdateResult
             })
         }
     }

@@ -354,6 +354,12 @@ p {
     margin-top: 12px;
 }
 
+#geolocation-error {
+    padding: 12px;
+    border-radius: 5px;
+    background-color: #FFCCCC;
+}
+
 #midpoint-context {
     margin-top: 16px;
     margin-bottom:12px;
