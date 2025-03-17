@@ -136,8 +136,9 @@ export class FeatureInstruction extends FeatureBase {
 }
 
 export class FeatureLocationInputs extends FeatureBase {
-    constructor(element) {
+    constructor(element, errorElement) {
         super(element);
+        this.errorElement = errorElement;
     }
 
     shouldShow({ hasMeetupData, isManualFlow, isShareFlow, userId, userLocations }) {
@@ -147,6 +148,10 @@ export class FeatureLocationInputs extends FeatureBase {
             || (hasMeetupData && isManualFlow) // Manual flow in progress
             || (hasMeetupData && !(userId in userLocations) // Joined meetup but hasn't added location
             ));
+    }
+
+    onShow() {
+        this.errorElement.classList.add('hidden');
     }
 }
 

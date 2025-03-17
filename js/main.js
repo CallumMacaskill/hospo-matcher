@@ -49,7 +49,7 @@ const featureRegistry = {
     context: new FeatureContext(dom.elements.contextContainer, dom.elements.contextText),
     meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer),
     instruction: new FeatureInstruction(dom.elements.instruction),
-    locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer),
+    locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer, dom.elements.geolocationError),
     results: new FeatureResults(dom.elements.resultsSection, open_sesame),
     share: new FeatureShare(dom.elements.shareContainer),
 }
@@ -151,23 +151,24 @@ async function processLocationInput(latitude, longitude, placeId) {
 
 async function getCurrentLocationHandler() {
     await dom.setLoadingVisibility(true);
-    const { latitude, longitude } = await new Promise((resolve, reject) => {
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    resolve({
-                        latitude: position.coords.latitude,
-                        longitude: position.coords.longitude,
-                    });
-                },
-                (error) => reject(error)
-            );
-        } else {
-            reject(new Error("Geolocation not supported"));
+    
+    if (!navigator.geolocation) {
+        dom.showGeolocationPermissionsError(new Error("Geolocation not supported"));
+        await dom.setLoadingVisibility(false);
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+        async (position) => {
+            await processLocationInput(position.coords.latitude, position.coords.longitude);
+        },
+        async (error) => {
+            dom.showGeolocationPermissionsError(error);
+            await dom.setLoadingVisibility(false);
         }
-    });
-    processLocationInput(latitude, longitude);
+    );
 }
+
 
 async function setFlow(flowName) {
     console.log(`Setting ${flowName} to ${true}`)
