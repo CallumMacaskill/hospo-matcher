@@ -63,9 +63,9 @@ export class FeatureMeetupLocations extends FeatureBase {
         super(element);
     }
 
-    shouldShow({ hasMeetupData, isManualFlow, userId, userLocations }) {
+    shouldShow({ numLocations, hasMeetupData, isManualFlow, userId, userLocations }) {
         return (
-            (hasMeetupData && isManualFlow) // Manual flow in progress
+            (numLocations >= 1 && isManualFlow) // Manual flow in progress
             || (hasMeetupData && userId in userLocations) // Joined meetup and added a location
         );
     }
