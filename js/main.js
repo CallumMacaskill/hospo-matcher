@@ -150,6 +150,7 @@ async function processLocationInput(latitude, longitude, placeId) {
 }
 
 async function getCurrentLocationHandler() {
+    await dom.setLoadingVisibility(true);
     const { latitude, longitude } = await new Promise((resolve, reject) => {
         if (navigator.geolocation) {
             navigator.geolocation.getCurrentPosition(
