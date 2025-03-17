@@ -79,7 +79,7 @@ async function updatePage(featureRegistry, meetup, dom) {
         dom: dom,
     });
     featureVariableMapping.set(featureRegistry.meetupLocations, {
-        meetupCode: meetup.data['code'],
+        meetupCode: meetup.data ? meetup.data["code"] : null,
         dom: dom,
     });
 
