@@ -1,4 +1,4 @@
-import { reverseGeocodeLocation } from "./maps_platform.js";
+import { reverseGeocodeLocation } from "./maps.js";
 
 class FeatureBase {
 

@@ -1,4 +1,4 @@
-import { reverseGeocodeLocation, searchNearbyPlaces } from './maps_platform.js';
+import { reverseGeocodeLocation, searchNearbyPlaces } from './maps.js';
 
 export class Meetup {
     constructor(data) {

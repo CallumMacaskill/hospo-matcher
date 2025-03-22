@@ -85,10 +85,12 @@ export class Dom {
         }
     }
 
-    initializeAutocomplete() {
+    initializeAutocomplete(localiseCountry) {
         // Create the Place Autocomplete Element
         console.log('Initialising places autocomplete widget')
-        const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement();
+        const placeAutocomplete = new google.maps.places.PlaceAutocompleteElement({
+            componentRestrictions: localiseCountry ? { country: localiseCountry } : undefined
+        });
 
         placeAutocomplete.addEventListener("focus", function (e) {
             setTimeout(() => {
