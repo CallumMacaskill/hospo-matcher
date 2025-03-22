@@ -19,12 +19,16 @@ const placeAutocomplete = dom.initializeAutocomplete();
 
 // Get Place coordinates on selection, and display the results.
 placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
+    // Disable other location input button
+    dom.elements.getLocationBtn.disabled = true;
+
     await place.fetchFields({
         fields: ["location"],
     });
 
     // Trigger input processing
     await processLocationInput(place.location.lat(), place.location.lng(), place.id)
+    dom.elements.getLocationBtn.disabled = false;
 });
 
 // Load current user's browser data
