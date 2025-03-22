@@ -23,6 +23,9 @@ placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
         fields: ["location"],
     });
 
+    // Disable other location input button
+    dom.elements.getLocationBtn.disabled = true;
+
     // Trigger input processing
     await processLocationInput(place.location.lat(), place.location.lng(), place.id)
 });
