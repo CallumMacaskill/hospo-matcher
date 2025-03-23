@@ -15,7 +15,13 @@ const data = await response.json();
 const maps_open_sesame = data['maps_open_sesame'];
 const ip_open_sesame = data['ip_open_sesame'];
 
-const country = await getCountryFromIP(ip_open_sesame);
+// Get IP info
+let country = sessionStorage.getItem('ip_country');
+if (!country) {
+    country = await getCountryFromIP(ip_open_sesame);
+    sessionStorage.setItem('ip_country', country);
+}
+
 await loadGoogleMapsApi(maps_open_sesame);
 const placeAutocomplete = dom.initializeAutocomplete(country);
 
