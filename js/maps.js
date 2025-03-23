@@ -81,3 +81,22 @@ export async function searchNearbyPlaces(location, open_sesame) {
         return { error_details: error.message };
     }
 };
+
+export async function getCountryFromIP(open_sesame) {
+    try {
+        console.log(`Fetching IP information`)
+        const response = await fetch('https://ipinfo.io', {
+            headers: {
+                'Accept': 'application/json',
+                'Authorization': `Bearer ${open_sesame}`
+            }
+        });
+        const data = await response.json();
+        const country = data?.country ?? null;
+        console.log(`Got country: ${country}`)
+        return country;
+    } catch (error) {
+        console.error('Error fetching IP address:', error);
+        return null;
+    }
+}

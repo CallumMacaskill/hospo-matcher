@@ -2,7 +2,7 @@ import { Dom } from './dom.js';
 import { FeatureFlowChoice, FeatureDescription, FeatureContext, FeatureMeetupLocations, FeatureInstruction, FeatureLocationInputs, FeatureResults, FeatureShare, evaluateFeatures } from './features.js'
 import { Meetup } from './meetup.js';
 import { SessionData } from './session.js';
-import { loadGoogleMapsApi } from './maps_platform.js';
+import { loadGoogleMapsApi, getCountryFromIP } from './maps.js';
 import { generateCrudUrl } from './utils.js';
 
 const baseURL = window.location.origin + "/";
@@ -11,11 +11,19 @@ var dom = new Dom();
 
 // Load Maps Platform API and initialise Places autocomplete widget
 const response = await fetch(`/.netlify/functions/read_maps_platform_value`);
-const data = await response.json()
-const open_sesame = data['open_sesame']
+const data = await response.json();
+const maps_open_sesame = data['maps_open_sesame'];
+const ip_open_sesame = data['ip_open_sesame'];
 
-await loadGoogleMapsApi(open_sesame);
-const placeAutocomplete = dom.initializeAutocomplete();
+// Get IP info
+let country = sessionStorage.getItem('ip_country');
+if (!country) {
+    country = await getCountryFromIP(ip_open_sesame);
+    sessionStorage.setItem('ip_country', country);
+}
+
+await loadGoogleMapsApi(maps_open_sesame);
+const placeAutocomplete = dom.initializeAutocomplete(country);
 
 // Get Place coordinates on selection, and display the results.
 placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
@@ -54,7 +62,7 @@ const featureRegistry = {
     meetupLocations: new FeatureMeetupLocations(dom.elements.locationsContainer),
     instruction: new FeatureInstruction(dom.elements.instruction),
     locationInputs: new FeatureLocationInputs(dom.elements.locationInputsContainer, dom.elements.geolocationError),
-    results: new FeatureResults(dom.elements.resultsSection, open_sesame),
+    results: new FeatureResults(dom.elements.resultsSection, maps_open_sesame),
     share: new FeatureShare(dom.elements.shareContainer),
 }
 

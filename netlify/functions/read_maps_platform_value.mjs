@@ -3,7 +3,8 @@ export const handler = async (event) => {
         return {
             statusCode: 200,
             body: JSON.stringify({
-                open_sesame: process.env.GOOGLE_MAPS_PLACES_API_KEY
+                maps_open_sesame: process.env.GOOGLE_MAPS_PLACES_API_KEY,
+                ip_open_sesame: process.env.IPINFO_TOKEN,
             })
         };
     } catch (error) {
