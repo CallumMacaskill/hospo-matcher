@@ -30,8 +30,12 @@ export class Dom {
     }
 
     generatePlacesElements(places) {
-        console.log(`Creating page elements for ${places.length} places`)
         this.elements.placesList.innerHTML = ''; // Clear the current list
+        if (!places) {
+            console.log('No places to generate elements for');
+            return;
+        }
+        console.log(`Creating page elements for ${places.length} places`)
         places.forEach(place => {
             const placeDiv = document.createElement('div');
             placeDiv.classList.add('place');
@@ -176,8 +180,6 @@ export class Dom {
             this.elements.shareMidpointBtn.innerHTML = meetup.resultAddress;
         }
 
-        if (meetup.nearbyPlaces) {
-            this.generatePlacesElements(meetup.nearbyPlaces);
-        }
+        this.generatePlacesElements(meetup.nearbyPlaces);
     }
 }
