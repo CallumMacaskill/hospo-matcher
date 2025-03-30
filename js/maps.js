@@ -39,7 +39,7 @@ export async function reverseGeocodeLocation(location) {
     }
 }
 
-export async function searchNearbyPlaces(location, open_sesame) {
+export async function searchNearbyPlaces(location, radius, open_sesame) {
     console.log(`Searching places near ${location.latitude}, ${location.longitude}`);
 
     const apiUrl = "https://places.googleapis.com/v1/places:searchNearby";
@@ -49,7 +49,7 @@ export async function searchNearbyPlaces(location, open_sesame) {
         locationRestriction: {
             circle: {
                 center: { latitude: location.latitude, longitude: location.longitude },
-                radius: 2000.0
+                radius: radius,
             }
         }
     };

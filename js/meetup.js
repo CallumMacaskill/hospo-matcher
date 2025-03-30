@@ -9,13 +9,46 @@ export class Meetup {
         this.data = data;
         this.resultMessage = null;
         this.resultLocation = null;
+        this.resultSearchRadius = null;
         this.resultAddress = null;
         this.nearbyPlaces = null;
         console.log('Set new state to meetup')
     }
 
-    calculateMidpoint(numLocations) {
-        if (!this.data) {
+    flattenCoordinates() {
+        let coordinates = [];
+        Object.values(this.data['user_locations']).forEach(list => {
+            list.forEach(coord => {
+                if (coord.latitude && coord.longitude) {
+                    coordinates.push({
+                        latitude: parseFloat(coord.latitude),
+                        longitude: parseFloat(coord.longitude),
+                    });
+                }
+            });
+        });
+        return coordinates;
+    }
+
+    haversineDistance(coord1, coord2) {
+        const R = 6371; // Earth's radius in km
+        const toRadians = deg => (deg * Math.PI) / 180;
+
+        const dLat = toRadians(coord2.latitude - coord1.latitude);
+        const dLon = toRadians(coord2.longitude - coord1.longitude);
+        const lat1 = toRadians(coord1.latitude);
+        const lat2 = toRadians(coord2.latitude);
+
+        const a = Math.sin(dLat / 2) ** 2 + Math.cos(lat1) * Math.cos(lat2) * Math.sin(dLon / 2) ** 2;
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        const result = R * c * 1000;
+        console.log(`Calculated Haversine distance: ${result}`)
+        return R * c * 1000; // Convert to meters
+    }
+
+    calculateMidpoint(coordinates) {
+        if (coordinates.length === 0) {
             throw new Error("Invalid inputs for calculating midpoint.");
         }
     
@@ -23,30 +56,60 @@ export class Meetup {
         let totalLongitude = 0;
     
         // Iterate through the lists and accumulate latitude and longitude values
-        Object.values(this.data['user_locations']).forEach(list => {
-            list.forEach(coord => {
-                if (coord.latitude && coord.longitude) {
-                    totalLatitude += parseFloat(coord.latitude);
-                    totalLongitude += parseFloat(coord.longitude);
-                }
-            });
+        coordinates.forEach(coord => {
+            totalLatitude += coord.latitude;
+            totalLongitude += coord.longitude;
         });
     
         this.resultLocation = {
-            latitude: totalLatitude / numLocations,
-            longitude: totalLongitude / numLocations,
+            latitude: totalLatitude / coordinates.length,
+            longitude: totalLongitude / coordinates.length,
         };
         console.log(`Calculated midpoint ${this.resultLocation.latitude}, ${this.resultLocation.longitude}`)
     }
+
+    calculateSearchRadius(coordinates, scalingFactor = 0.35, minRadius = 100, maxRadius = 3000) {
+        if (!this.resultLocation) {
+            throw new Error("Midpoint must be calculated before computing search radius.");
+        }
+    
+        let distances = [];
+    
+        // Calculate the distances to the midpoint for each coordinate
+        coordinates.forEach(coord => {
+            const distance = this.haversineDistance(coord, this.resultLocation);
+            distances.push(distance);
+        });
+    
+        // Compute the mean distance
+        const totalDistance = distances.reduce((acc, dist) => acc + dist, 0);
+        const averageDistance = totalDistance / coordinates.length;
+        console.log(`Mean distance: ${averageDistance}`);
+    
+        // Calculate search radius based on distance
+        let searchRadius = scalingFactor * averageDistance;
+        console.log(`Scaled distance: ${searchRadius}`);
+    
+        // Clamp the radius to a reasonable range (in km)
+        searchRadius = Math.max(minRadius, Math.min(searchRadius, maxRadius));
+        console.log(`Clamped distance: ${searchRadius}`);
+    
+        return searchRadius;
+    }
+    
 
     async evaluateResult(open_sesame) {
         console.log('Evaluating result')    
         // Calculate the number of locations submitted
         const numLocations = Object.values(this.data.user_locations).reduce((sum, list) => sum + list.length, 0);
+        const coordinates = this.flattenCoordinates();
     
-        if (numLocations > 1) {
+        if (coordinates.length > 1) {
             // Calculate midpoint coordinates
-            this.calculateMidpoint(numLocations);
+            this.calculateMidpoint(coordinates);
+
+            // Calculate midpoint nearby location search radius
+            const searchRadius = this.calculateSearchRadius(coordinates);
     
             // Update midpoint element text
             this.resultMessage = `Your midpoint between ${numLocations} locations`;
@@ -55,7 +118,7 @@ export class Meetup {
             this.resultAddress = address
     
             // Search nearby Places
-            this.nearbyPlaces = await searchNearbyPlaces(this.resultLocation, open_sesame);
+            this.nearbyPlaces = await searchNearbyPlaces(this.resultLocation, searchRadius, open_sesame);
         }
     }
 
