@@ -26,16 +26,18 @@ await loadGoogleMapsApi(maps_open_sesame);
 const placeAutocomplete = dom.initializeAutocomplete(country);
 
 // Get Place coordinates on selection, and display the results.
-placeAutocomplete.addEventListener("gmp-placeselect", async ({ place }) => {
+placeAutocomplete.addEventListener('gmp-select', async ({ placePrediction }) => {
+    console.log('Running PAC input...')
     // Disable other location input button
     dom.elements.getLocationBtn.disabled = true;
 
-    await place.fetchFields({
-        fields: ["location"],
-    });
+    const place = placePrediction.toPlace();
+    await place.fetchFields({ fields: ['location'] });
+    console.log('Fetched location field')
 
     // Trigger input processing
     await processLocationInput(place.location.lat(), place.location.lng(), place.id)
+    console.log('Processed location input')
     dom.elements.getLocationBtn.disabled = false;
 });
 
