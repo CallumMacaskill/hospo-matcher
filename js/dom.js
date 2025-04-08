@@ -96,6 +96,7 @@ export class Dom {
             componentRestrictions: localiseCountry ? { country: localiseCountry } : undefined
         });
 
+        placeAutocomplete.id = 'place-autocomplete-input';
         
         placeAutocomplete.addEventListener("focus", function (e) {
             setTimeout(() => {
