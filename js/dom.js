@@ -96,6 +96,8 @@ export class Dom {
             componentRestrictions: localiseCountry ? { country: localiseCountry } : undefined
         });
 
+        placeAutocomplete.id = 'place-autocomplete-input';
+        
         placeAutocomplete.addEventListener("focus", function (e) {
             setTimeout(() => {
                 // Scroll to the top of the page - workaround for buggy pac positioning on mobile
