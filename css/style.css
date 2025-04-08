@@ -165,7 +165,6 @@
 body {
     font-family: 'Public Sans', sans-serif;
     font-weight: 400;
-    font-size: 16px;
     color: #555;
     min-height: 100vh;
     display: flex;
@@ -187,6 +186,7 @@ h2 {
 }
 
 h3 {
+    font-size: 14px;
     font-weight: 600;
 }
 
@@ -307,14 +307,10 @@ p {
     color: #555;
 }
 
-#place-autocomplete-input {
-    font-size: 16px;
-}
-
 /* General Button Styles */
 .btn {
     font-family: inherit;
-    /*font-size: 14px;*/
+    font-size: 14px;
     font-weight: 700;
     display: block;
     width: 100%;
@@ -388,11 +384,13 @@ p {
 }
 
 .place h3 {
+    font-size: 14px;
     font-weight: 700;
     margin-bottom: 5px;
 }
 
 .place p {
+    font-size: 14px;
     color: #555;
     white-space: nowrap;
     overflow: hidden;
@@ -417,7 +415,7 @@ p {
 }
 
 .address-item span {
-    /*font-size: 14px;*/
+    font-size: 14px;
     color: #555;
     white-space: nowrap;
     overflow: hidden;
