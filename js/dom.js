@@ -96,12 +96,13 @@ export class Dom {
             componentRestrictions: localiseCountry ? { country: localiseCountry } : undefined
         });
 
-        placeAutocomplete.addEventListener("focus", function (e) {
-            setTimeout(() => {
-                // Scroll to the top of the page - workaround for buggy pac positioning on mobile
-                window.scrollTo(0, 1);
-            }, 50); // Delay to accommodate viewport resizing
-        });
+        
+        //placeAutocomplete.addEventListener("focus", function (e) {
+        //    setTimeout(() => {
+        //        // Scroll to the top of the page - workaround for buggy pac positioning on mobile
+        //        window.scrollTo(0, 1);
+        //    }, 50); // Delay to accommodate viewport resizing
+        //});
 
         // Insert the autocomplete element after the "Get Current Location" button
         console.log('Inserting widget')
